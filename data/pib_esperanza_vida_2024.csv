@@ -1,0 +1,101 @@
+iso3,pais,region,ingreso,grupo,pib_pc_usd_2024,esperanza_vida_2024
+AFG,Afganistán,"Oriente Medio, Norte de África, Afganistán y Pakistán",Ingreso bajo,Otro,416.9,66.289
+DEU,Alemania,Europa y Asia Central,Ingreso alto,Otro,56103.7,80.793
+AGO,Angola,África Subsahariana,Ingreso mediano bajo,Otro,2720.8,64.805
+SAU,Arabia Saudita,"Oriente Medio, Norte de África, Afganistán y Pakistán",Ingreso alto,Otro,35527.8,78.982
+DZA,Argelia,"Oriente Medio, Norte de África, Afganistán y Pakistán",Ingreso mediano alto,Otro,5753.0,76.475
+ARG,Argentina,América Latina y el Caribe,Ingreso mediano alto,Otro,13969.8,77.543
+AUS,Australia,Asia Oriental y el Pacífico,Ingreso alto,Otro,64610.0,83.051
+BGD,Bangladés,Asia Meridional,Ingreso mediano bajo,Otro,2593.4,74.93
+BEN,Benín,África Subsahariana,Ingreso mediano bajo,Zona roja,1485.4,60.961
+BOL,Bolivia,América Latina y el Caribe,Ingreso mediano bajo,Otro,4421.2,68.739
+BWA,Botsuana,África Subsahariana,Ingreso mediano alto,Otro,7649.8,69.293
+BRA,Brasil,América Latina y el Caribe,Ingreso mediano alto,Otro,10310.5,76.023
+BGR,Bulgaria,Europa y Asia Central,Ingreso alto,Otro,17596.9,75.761
+KHM,Camboya,Asia Oriental y el Pacífico,Ingreso mediano bajo,Otro,2627.9,70.817
+CAN,Canadá,América del Norte,Ingreso alto,Otro,55015.7,82.108
+QAT,Catar,"Oriente Medio, Norte de África, Afganistán y Pakistán",Ingreso alto,Otro,75685.1,82.522
+TCD,Chad,África Subsahariana,Ingreso bajo,Zona roja,980.7,55.238
+CHL,Chile,América Latina y el Caribe,Ingreso alto,Otro,16659.0,81.359
+CHN,China,Asia Oriental y el Pacífico,Ingreso mediano alto,Otro,13293.1,78.017
+COL,Colombia,América Latina y el Caribe,Ingreso mediano alto,Otro,7951.1,77.913
+KOR,Corea del Sur,Asia Oriental y el Pacífico,Ingreso alto,Otro,36238.6,83.629
+CRI,Costa Rica,América Latina y el Caribe,Ingreso alto,Zona azul,18853.3,80.996
+ECU,Ecuador,América Latina y el Caribe,Ingreso mediano alto,Otro,6826.5,77.579
+EGY,Egipto,"Oriente Medio, Norte de África, Afganistán y Pakistán",Ingreso mediano bajo,Otro,3338.5,71.806
+SLV,El Salvador,América Latina y el Caribe,Ingreso mediano alto,Otro,5503.1,72.302
+ARE,Emiratos Árabes Unidos,"Oriente Medio, Norte de África, Afganistán y Pakistán",Ingreso alto,Otro,50273.5,83.069
+ESP,España,Europa y Asia Central,Ingreso alto,Otro,35326.8,83.888
+USA,Estados Unidos,América del Norte,Ingreso alto,Zona azul,86169.7,78.89
+ETH,Etiopía,África Subsahariana,Ingreso bajo,Otro,1133.9,67.603
+PHL,Filipinas,Asia Oriental y el Pacífico,Ingreso mediano alto,Otro,3985.3,69.946
+FRA,Francia,Europa y Asia Central,Ingreso alto,Otro,46103.1,82.98
+GEO,Georgia,Europa y Asia Central,Ingreso mediano alto,Otro,8967.7,74.657
+GHA,Ghana,África Subsahariana,Ingreso mediano bajo,Otro,2419.3,65.695
+GRC,Grecia,Europa y Asia Central,Ingreso alto,Zona azul,24626.1,81.839
+GTM,Guatemala,América Latina y el Caribe,Ingreso mediano alto,Otro,6150.9,72.746
+GIN,Guinea,África Subsahariana,Ingreso mediano bajo,Zona roja,1695.0,60.904
+GUY,Guyana,América Latina y el Caribe,Ingreso alto,Otro,29675.3,70.319
+HTI,Haití,América Latina y el Caribe,Ingreso mediano bajo,Otro,2060.4,65.119
+HND,Honduras,América Latina y el Caribe,Ingreso mediano bajo,Otro,3416.0,73.044
+HUN,Hungría,Europa y Asia Central,Ingreso alto,Otro,23305.4,76.724
+IND,India,Asia Meridional,Ingreso mediano bajo,Otro,2592.0,72.235
+IDN,Indonesia,Asia Oriental y el Pacífico,Ingreso mediano alto,Otro,4925.4,71.288
+IRQ,Irak,"Oriente Medio, Norte de África, Afganistán y Pakistán",Ingreso mediano alto,Otro,6073.6,72.424
+IRL,Irlanda,Europa y Asia Central,Ingreso alto,Otro,112895.0,83.01
+IRN,Irán,"Oriente Medio, Norte de África, Afganistán y Pakistán",Ingreso mediano alto,Otro,5190.2,77.854
+ISR,Israel,"Oriente Medio, Norte de África, Afganistán y Pakistán",Ingreso alto,Otro,54216.5,83.198
+ITA,Italia,Europa y Asia Central,Ingreso alto,Zona azul,40429.6,83.951
+JAM,Jamaica,América Latina y el Caribe,Ingreso mediano alto,Otro,7753.8,71.606
+JPN,Japón,Asia Oriental y el Pacífico,Ingreso alto,Zona azul,33797.1,84.036
+KAZ,Kazajistán,Europa y Asia Central,Ingreso mediano alto,Otro,14154.6,74.531
+KEN,Kenia,África Subsahariana,Ingreso mediano bajo,Otro,2133.5,63.834
+LSO,Lesoto,África Subsahariana,Ingreso mediano bajo,Zona roja,1023.0,57.798
+LUX,Luxemburgo,Europa y Asia Central,Ingreso alto,Otro,137781.7,83.195
+MDG,Madagascar,África Subsahariana,Ingreso bajo,Otro,550.4,63.835
+MYS,Malasia,Asia Oriental y el Pacífico,Ingreso mediano alto,Otro,11874.4,76.821
+MLI,Malí,África Subsahariana,Ingreso bajo,Zona roja,1093.3,60.675
+MAR,Marruecos,"Oriente Medio, Norte de África, Afganistán y Pakistán",Ingreso mediano bajo,Otro,4153.2,75.493
+MNG,Mongolia,Asia Oriental y el Pacífico,Ingreso mediano alto,Otro,6750.6,72.398
+MMR,Myanmar,Asia Oriental y el Pacífico,Ingreso mediano bajo,Otro,1359.1,67.095
+MEX,México,América Latina y el Caribe,Ingreso mediano alto,Otro,13988.0,75.264
+NPL,Nepal,Asia Meridional,Ingreso mediano bajo,Otro,1460.3,70.636
+NIC,Nicaragua,América Latina y el Caribe,Ingreso mediano bajo,Otro,2847.9,75.1
+NGA,Nigeria,África Subsahariana,Ingreso mediano bajo,Zona roja,1084.2,54.635
+NOR,Noruega,Europa y Asia Central,Ingreso alto,Otro,89889.0,83.161
+NZL,Nueva Zelanda,Asia Oriental y el Pacífico,Ingreso alto,Otro,49432.4,82.01
+NER,Níger,África Subsahariana,Ingreso bajo,Zona roja,729.9,61.433
+PAK,Pakistán,"Oriente Medio, Norte de África, Afganistán y Pakistán",Ingreso mediano bajo,Otro,1479.5,67.799
+PAN,Panamá,América Latina y el Caribe,Ingreso alto,Otro,19161.2,79.775
+PNG,Papúa Nueva Guinea,Asia Oriental y el Pacífico,Ingreso mediano bajo,Otro,2912.5,66.256
+PRY,Paraguay,América Latina y el Caribe,Ingreso mediano alto,Otro,6456.6,73.982
+NLD,Países Bajos,Europa y Asia Central,Ingreso alto,Otro,67465.3,81.966
+PER,Perú,América Latina y el Caribe,Ingreso mediano alto,Otro,8526.3,77.941
+POL,Polonia,Europa y Asia Central,Ingreso alto,Otro,25103.6,78.41
+PRT,Portugal,Europa y Asia Central,Ingreso alto,Otro,29328.3,82.383
+COD,R. D. del Congo,África Subsahariana,Ingreso bajo,Otro,692.9,62.074
+GBR,Reino Unido,Europa y Asia Central,Ingreso alto,Otro,53341.3,81.387
+CAF,República Centroafricana,África Subsahariana,Ingreso bajo,Zona roja,516.2,57.671
+DOM,República Dominicana,América Latina y el Caribe,Ingreso mediano alto,Otro,10875.7,73.868
+RWA,Ruanda,África Subsahariana,Ingreso bajo,Otro,1059.9,68.017
+ROU,Rumania,Europa y Asia Central,Ingreso alto,Otro,20080.2,76.459
+RUS,Rusia,Europa y Asia Central,Ingreso alto,Otro,14961.9,73.44
+SEN,Senegal,África Subsahariana,Ingreso mediano bajo,Otro,1738.7,68.924
+SRB,Serbia,Europa y Asia Central,Ingreso mediano alto,Otro,13677.8,75.968
+SLE,Sierra Leona,África Subsahariana,Ingreso bajo,Zona roja,806.7,61.964
+SGP,Singapur,Asia Oriental y el Pacífico,Ingreso alto,Otro,94896.6,83.346
+SOM,Somalia,África Subsahariana,Ingreso bajo,Zona roja,629.5,58.967
+LKA,Sri Lanka,Asia Meridional,Ingreso mediano alto,Otro,4545.4,77.672
+ZAF,Sudáfrica,África Subsahariana,Ingreso mediano alto,Otro,6267.2,66.312
+SDN,Sudán,África Subsahariana,Ingreso bajo,Otro,984.6,66.521
+SWE,Suecia,Europa y Asia Central,Ingreso alto,Otro,57222.7,84.063
+CHE,Suiza,Europa y Asia Central,Ingreso alto,Otro,107702.1,84.407
+THA,Tailandia,Asia Oriental y el Pacífico,Ingreso mediano alto,Otro,7386.6,76.564
+TZA,Tanzania,África Subsahariana,Ingreso mediano bajo,Otro,1192.6,67.212
+TJK,Tayikistán,Europa y Asia Central,Ingreso mediano bajo,Otro,1362.0,71.927
+TUR,Turquía,Europa y Asia Central,Ingreso mediano alto,Otro,15892.7,77.421
+UKR,Ucrania,Europa y Asia Central,Ingreso mediano alto,Otro,5391.6,74.692
+URY,Uruguay,América Latina y el Caribe,Ingreso alto,Otro,24308.5,78.287
+UZB,Uzbekistán,Europa y Asia Central,Ingreso mediano bajo,Otro,3337.5,72.528
+VEN,Venezuela,América Latina y el Caribe,Ingreso mediano bajo,Venezuela,4244.5,72.673
+VNM,Vietnam,Asia Oriental y el Pacífico,Ingreso mediano alto,Otro,4716.7,74.736
