@@ -5,6 +5,8 @@ Trabajo de **Estadística II**, Escuela de Estadística y Ciencias Actuariales, 
 - **Autores:** Allan Arcia y Eddie Palomino
 - **Profesoras:** Sandra Pinto y Yuraisi Carriles
 
+**App interactiva:** https://regresion-pib-esperanza-vida.streamlit.app
+
 Estudiamos si el PIB per cápita explica la esperanza de vida al nacer en 100 países, incluyendo a Venezuela, los países de las zonas azules (Japón, Italia, Grecia, Costa Rica y Estados Unidos) y diez países de baja esperanza de vida que llamamos zonas rojas (Nigeria, Chad, República Centroafricana, Lesoto, Somalia, Malí, Guinea, Benín, Níger y Sierra Leona).
 
 ## Datos
