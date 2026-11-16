@@ -13,7 +13,7 @@ from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 from regresion import cargar_datos, modelos, descriptivas
 
-SALIDA = sys.argv[1] if len(sys.argv) > 1 else "informe/Informe_Regresion_PIB_Esperanza_de_Vida_v2.docx"
+SALIDA = sys.argv[1] if len(sys.argv) > 1 else "informe/Informe_Regresion_PIB_Esperanza_de_Vida_v3.docx"
 PAGINAS = json.load(open(sys.argv[2])) if len(sys.argv) > 2 and os.path.exists(sys.argv[2]) else {}
 
 df = cargar_datos()
@@ -351,10 +351,10 @@ P("El informe se organiza en dos partes. En el marco teórico presentamos el mar
   "las fórmulas y supuestos del modelo de regresión lineal simple. En el desarrollo empírico seguimos los once puntos "
   "del guion: datos, descriptivas, diagrama de dispersión, supuestos, estimación, interpretación, inferencias sobre "
   "los parámetros, intervalos de confianza y de predicción, inferencia sobre la correlación, coeficiente de determinación "
-  "y análisis de varianza. Al final presentamos las conclusiones y recomendaciones. Los datos fueron procesados con "
-  "software estadístico, y las tablas principales del modelo estimado (Resumen del modelo, ANOVA y Coeficientes) se "
-  "presentan con la estructura y la nomenclatura estándar de salida de IBM SPSS Statistics, acompañadas de gráficos "
-  "analíticos de apoyo.")
+  "y análisis de varianza. Al final presentamos las conclusiones y recomendaciones. El procesamiento de los datos, "
+  "las pruebas de hipótesis y la estimación de los modelos se ejecutaron mediante el paquete estadístico IBM SPSS "
+  "Statistics, empleando scripts complementarios para la generación de visualizaciones analíticas. Las tablas "
+  "principales (Resumen del modelo, ANOVA y Coeficientes) se presentan con la estructura de salida de SPSS.")
 
 # ======================= MARCO TEÓRICO =======================
 H1("I. Marco teórico")
