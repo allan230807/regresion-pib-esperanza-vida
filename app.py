@@ -375,7 +375,7 @@ with st.sidebar:
     st.markdown(
         f"**Modelo principal**  \nŶ = {num(R2['a'], 4)} + {num(R2['b'], 4)} · ln(PIB)  \n"
         f"r = {num(R2['r'], 4)} · R² = {num(R2['r2'], 4)}")
-    st.caption("Allan Arcia y Eddie Palomino  \nProfesoras: Sandra Pinto y Yuraisi Carriles")
+    st.caption("Allan Arcia y Eddie Palomino  \nProfesoras: Sandra Pinto y Yuraisi Capriles")
 
 # ==========================================================================
 # PORTADA
@@ -392,7 +392,7 @@ if seccion == "Portada":
   <div class="pie">
     <div><b>Asignatura</b>Estadística II</div>
     <div><b>Autores</b>Allan Arcia · Eddie Palomino</div>
-    <div><b>Profesoras</b>Sandra Pinto · Yuraisi Carriles</div>
+    <div><b>Profesoras</b>Sandra Pinto · Yuraisi Capriles</div>
     <div><b>Fuente</b>Banco Mundial, Indicadores del Desarrollo Mundial</div>
   </div>
 </div>
@@ -1121,6 +1121,6 @@ Procesamiento y cálculos en Python (pandas, NumPy, SciPy y statsmodels) con las
 
 st.markdown(
     "<div class='pie-pagina'>Estadística II · Escuela de Estadística y Ciencias Actuariales, UCV · "
-    "Allan Arcia y Eddie Palomino · Profesoras Sandra Pinto y Yuraisi Carriles · "
+    "Allan Arcia y Eddie Palomino · Profesoras Sandra Pinto y Yuraisi Capriles · "
     "Fuente: Banco Mundial, Indicadores del Desarrollo Mundial (2024)</div>",
     unsafe_allow_html=True)

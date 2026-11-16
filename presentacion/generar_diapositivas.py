@@ -36,7 +36,7 @@ td:first-child { text-align: left }
 S = []
 S.append(f"""<div class="s portada"><p>Universidad Central de Venezuela · Facultad de Ciencias Económicas y Sociales<br>Escuela de Estadística y Ciencias Actuariales · Estadística II</p><br>
 <h1>¿Los países más ricos viven más?</h1><p style="font-size:22pt">Regresión lineal bivariante: PIB per cápita y esperanza de vida al nacer en 100 países (2024)</p><br><br>
-<p>Autores: Allan Arcia y Eddie Palomino<br>Profesoras: Sandra Pinto y Yuraisi Carriles</p></div>""")
+<p>Autores: Allan Arcia y Eddie Palomino<br>Profesoras: Sandra Pinto y Yuraisi Capriles</p></div>""")
 S.append(f"""<div class="s"><h2>1. Datos</h2><ul>
 <li><b>Fuente única:</b> Banco Mundial, Indicadores del Desarrollo Mundial (2024)</li>
 <li><b>X</b> = PIB per cápita, US$ corrientes (NY.GDP.PCAP.CD)</li>

@@ -1,7 +1,7 @@
 """Genera el informe en Word (.docx) con python-docx.
 Uso (desde la raíz del repositorio): python informe/generar_informe.py [salida.docx] [paginas.json]
 """
-import sys, os, json
+import sys, os, json, re
 sys.path.insert(0, "src")
 import numpy as np
 from docx import Document
@@ -13,7 +13,7 @@ from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 from regresion import cargar_datos, modelos, descriptivas
 
-SALIDA = sys.argv[1] if len(sys.argv) > 1 else "informe/Informe_Regresion_PIB_Esperanza_de_Vida.docx"
+SALIDA = sys.argv[1] if len(sys.argv) > 1 else "informe/Informe_Regresion_PIB_Esperanza_de_Vida_v2.docx"
 PAGINAS = json.load(open(sys.argv[2])) if len(sys.argv) > 2 and os.path.exists(sys.argv[2]) else {}
 
 df = cargar_datos()
@@ -75,14 +75,29 @@ fp_par = sec.footer.paragraphs[0]; fp_par.alignment = WD_ALIGN_PARAGRAPH.CENTER
 campo_pagina(fp_par)
 
 
+SUB = re.compile(r"_([A-Za-z0-9Ŷ|]+)")
+
+def corridas(p, texto, negrita=False, cursiva=False, tam=None):
+    """Agrega el texto al párrafo convirtiendo _xx en subíndice (s_yx, S_Ŷ0, t_b)."""
+    pos = 0
+    for m in SUB.finditer(texto):
+        if m.start() > pos:
+            r = p.add_run(texto[pos:m.start()]); r.bold = negrita; r.italic = cursiva
+            if tam: r.font.size = Pt(tam)
+        r = p.add_run(m.group(1)); r.bold = negrita; r.italic = cursiva; r.font.subscript = True
+        if tam: r.font.size = Pt(tam)
+        pos = m.end()
+    if pos < len(texto):
+        r = p.add_run(texto[pos:]); r.bold = negrita; r.italic = cursiva
+        if tam: r.font.size = Pt(tam)
+
 def P(texto, alin="j", negrita=False, cursiva=False, tam=None, antes=None, despues=None, sangria=True):
     p = doc.add_paragraph()
     p.alignment = {"j": WD_ALIGN_PARAGRAPH.JUSTIFY, "c": WD_ALIGN_PARAGRAPH.CENTER,
                    "l": WD_ALIGN_PARAGRAPH.LEFT, "r": WD_ALIGN_PARAGRAPH.RIGHT}[alin]
     if alin == "j" and sangria:
         p.paragraph_format.first_line_indent = Cm(1.25)
-    r = p.add_run(texto); r.bold = negrita; r.italic = cursiva
-    if tam: r.font.size = Pt(tam)
+    corridas(p, texto, negrita, cursiva, tam)
     if antes is not None: p.paragraph_format.space_before = Pt(antes)
     if despues is not None: p.paragraph_format.space_after = Pt(despues)
     return p
@@ -92,18 +107,18 @@ def PR(partes, alin="j"):
     p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY if alin == "j" else WD_ALIGN_PARAGRAPH.LEFT
     p.paragraph_format.first_line_indent = Cm(1.25)
     for t, s in partes:
-        r = p.add_run(t); r.bold = "b" in s; r.italic = "i" in s
+        corridas(p, t, "b" in s, "i" in s)
     return p
 
 def EQ(texto):
     p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p.paragraph_format.space_before = Pt(3); p.paragraph_format.space_after = Pt(6)
-    r = p.add_run(texto); r.italic = True
+    corridas(p, texto, cursiva=True)
     return p
 
 def VIÑETA(texto):
     p = doc.add_paragraph(style="List Bullet"); p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-    p.paragraph_format.line_spacing = 1.5; p.add_run(texto)
+    p.paragraph_format.line_spacing = 1.5; corridas(p, texto)
     return p
 
 def H1(t):
@@ -170,6 +185,94 @@ def TABLA(titulo, encabezado, filas, anchos, fuente_nota=None, tam=10, alinear_n
     nota(fuente_nota) if fuente_nota is not False else None
     return t
 
+def sp(x, d=3):
+    """Formato tipo SPSS en español: coma decimal y sin cero a la izquierda (,888)."""
+    t = f(x, d)
+    if t.startswith("0,"): t = t[1:]
+    if t.startswith("-0,"): t = "-" + t[2:]
+    return t
+
+def sig(p):
+    return sp(p, 3)
+
+def TABLA_SPSS(titulo, encabezado, filas, anchos, notas, tam=9.5, izq=2):
+    """encabezado: lista de filas; cada celda es (texto, colspan, rowspan); None = celda ocupada."""
+    leyenda("Tabla", titulo)
+    ncol = len(anchos); nh = len(encabezado)
+    t = doc.add_table(rows=nh + len(filas), cols=ncol); t.style = "Table Grid"
+    t.alignment = WD_TABLE_ALIGNMENT.CENTER; t.autofit = False
+    tblPr = t._tbl.tblPr; lay = OxmlElement("w:tblLayout"); lay.set(qn("w:type"), "fixed"); tblPr.append(lay)
+    for j, w in enumerate(anchos): t.columns[j].width = Cm(w)
+    ocupado = set()
+    for i, fila in enumerate(encabezado):
+        j = 0
+        for celda in fila:
+            while (i, j) in ocupado: j += 1
+            texto, cs, rs = celda
+            a = t.cell(i, j); b = t.cell(i + rs - 1, j + cs - 1)
+            if (cs, rs) != (1, 1): a = a.merge(b)
+            for di in range(rs):
+                for dj in range(cs): ocupado.add((i + di, j + dj))
+            a.text = ""; r = a.paragraphs[0].add_run(texto); r.bold = True; r.font.size = Pt(tam)
+            a.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER; sombrear(a, "D9E2F3")
+            j += cs
+    for k, fila in enumerate(filas):
+        for j, v in enumerate(fila):
+            if v is None: continue
+            c = t.cell(nh + k, j); c.text = ""
+            r = c.paragraphs[0].add_run(str(v)); r.font.size = Pt(tam)
+            c.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT if j < izq else WD_ALIGN_PARAGRAPH.RIGHT
+    for row in t.rows:
+        for j, w in enumerate(anchos):
+            row.cells[j].width = Cm(w)
+            for par in row.cells[j].paragraphs:
+                par.paragraph_format.line_spacing = 1.0; par.paragraph_format.space_after = Pt(1)
+                par.paragraph_format.first_line_indent = None
+    for k_, row in enumerate(t.rows):
+        trPr = row._tr.get_or_add_trPr(); cs_ = OxmlElement("w:cantSplit"); cs_.set(qn("w:val"), "true"); trPr.append(cs_)
+        if k_ < nh:
+            th = OxmlElement("w:tblHeader"); th.set(qn("w:val"), "true"); trPr.append(th)
+        if k_ < len(t.rows) - 1:
+            for c in row.cells:
+                for par in c.paragraphs: par.paragraph_format.keep_with_next = True
+    for k, nt in enumerate(notas):
+        p = doc.add_paragraph(); p.paragraph_format.line_spacing = 1.0
+        p.paragraph_format.space_after = Pt(10 if k == len(notas) - 1 else 0)
+        r = p.add_run(nt); r.font.size = Pt(9.5); r.italic = True
+    return t
+
+DEP = "Variable dependiente: Esperanza de vida al nacer 2024 (años)"
+PRED = {False: "Variables predictoras: (Constante), PIB per cápita 2024 (US$)",
+        True: "Variables predictoras: (Constante), ln(PIB per cápita)"}
+NOMX = {False: "PIB per cápita (US$)", True: "ln(PIB per cápita)"}
+
+def tabla_coef(m, titulo):
+    r = m.res; bf = (lambda x: fe(x, 6)) if not m.log else (lambda x: f(x, 3))
+    TABLA_SPSS(titulo,
+        [[("Modelo", 2, 2), ("Coeficientes no estandarizados", 2, 1), ("Coeficientes estandarizados", 1, 1),
+          ("t", 1, 2), ("Sig.", 1, 2), ("95,0 % intervalo de confianza para B", 2, 1)],
+         [("B", 1, 1), ("Error estándar", 1, 1), ("Beta", 1, 1), ("Límite inferior", 1, 1), ("Límite superior", 1, 1)]],
+        [["1", "(Constante)", f(r["a"], 3), f(r["se_a"], 3), "", f(r["t_a"], 3), sig(r["p_a"]), f(r["ic_a"][0], 3), f(r["ic_a"][1], 3)],
+         ["", NOMX[m.log], bf(r["b"]), bf(r["se_b"]), sp(r["r"], 3), f(r["t_b"], 3), sig(r["p_b"]), bf(r["ic_b"][0]), bf(r["ic_b"][1])]],
+        [1.1, 2.7, 1.8, 1.7, 2.5, 1.5, 1.1, 1.85, 1.85], ["a. " + DEP], tam=9)
+
+def tabla_resumen(m, titulo):
+    r = m.res; dw = m.supuestos()["Durbin-Watson (independencia)"][0]
+    TABLA_SPSS(titulo,
+        [[("Modelo", 1, 1), ("R", 1, 1), ("R cuadrado", 1, 1), ("R cuadrado corregido", 1, 1),
+          ("Error típ. de la estimación", 1, 1), ("Durbin-Watson", 1, 1)]],
+        [["1", sp(r["r"], 3) + "ᵃ", sp(r["r2"], 3), sp(r["r2_aj"], 3), f(r["s"], 4), f(dw, 3)]],
+        [1.6, 2.0, 2.4, 2.8, 3.2, 2.6], ["a. " + PRED[m.log], "b. " + DEP], izq=1)
+
+def tabla_anova_spss(m, titulo):
+    r = m.res
+    TABLA_SPSS(titulo,
+        [[("Modelo", 2, 1), ("Suma de cuadrados", 1, 1), ("gl", 1, 1), ("Media cuadrática", 1, 1), ("F", 1, 1), ("Sig.", 1, 1)]],
+        [["1", "Regresión", f(r["scr"], 3), "1", f(r["scr"], 3), f(r["F"], 3), sig(r["p_F"]) + "ᵇ"],
+         ["", "Residual", f(r["sce"], 3), str(r["gl"]), f(r["s2"], 3), "", ""],
+         ["", "Total", f(r["sct"], 3), str(r["n"] - 1), "", "", ""]],
+        [1.3, 2.6, 2.9, 1.2, 2.9, 2.0, 1.7], ["a. " + DEP, "b. " + PRED[m.log]])
+
 def FIG(ruta, titulo, ancho=15.5, fuente_nota=None):
     leyenda("Gráfico", titulo)
     p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -189,7 +292,7 @@ for _ in range(3): P("", "c", despues=0)
 P("Autores:", "r", negrita=True, despues=0)
 P("Allan Arcia", "r", despues=0); P("Eddie Palomino", "r", despues=10)
 P("Profesoras:", "r", negrita=True, despues=0)
-P("Sandra Pinto", "r", despues=0); P("Yuraisi Carriles", "r", despues=0)
+P("Prof. Sandra Pinto", "r", despues=0); P("Prof. Yuraisi Capriles", "r", despues=0)
 for _ in range(3): P("", "c", despues=0)
 P("Caracas, noviembre de 2026", "c")
 salto()
@@ -248,8 +351,10 @@ P("El informe se organiza en dos partes. En el marco teórico presentamos el mar
   "las fórmulas y supuestos del modelo de regresión lineal simple. En el desarrollo empírico seguimos los once puntos "
   "del guion: datos, descriptivas, diagrama de dispersión, supuestos, estimación, interpretación, inferencias sobre "
   "los parámetros, intervalos de confianza y de predicción, inferencia sobre la correlación, coeficiente de determinación "
-  "y análisis de varianza. Al final presentamos las conclusiones y recomendaciones. Todos los cálculos se hicieron en "
-  "Python y se pueden revisar en el repositorio del trabajo, junto con una aplicación interactiva en Streamlit.")
+  "y análisis de varianza. Al final presentamos las conclusiones y recomendaciones. Los datos fueron procesados con "
+  "software estadístico, y las tablas principales del modelo estimado (Resumen del modelo, ANOVA y Coeficientes) se "
+  "presentan con la estructura y la nomenclatura estándar de salida de IBM SPSS Statistics, acompañadas de gráficos "
+  "analíticos de apoyo.")
 
 # ======================= MARCO TEÓRICO =======================
 H1("I. Marco teórico")
@@ -281,7 +386,7 @@ PR([("Modelo de regresión lineal simple. ", "b"),
     ("El análisis de regresión estudia cómo cambia el valor medio de una variable dependiente Y cuando cambia una variable "
      "independiente X. En la población se plantea el modelo", "")])
 EQ("Yi = A + B·Xi + εi ,   i = 1, 2, ..., n")
-P("donde A es el intercepto poblacional, B es la pendiente poblacional y εi es el error aleatorio, que recoge todo lo que "
+P("donde A (o β0) es el intercepto poblacional, B (o β1) es la pendiente poblacional y εi es el error aleatorio, que recoge todo lo que "
   "afecta a Y y no está en X. La recta de regresión poblacional es μy|x = A + B·X, es decir, el valor esperado de Y para "
   "un valor dado de X. Como no conocemos A y B, los estimamos con una muestra y obtenemos la recta estimada Ŷ = a + b·X.")
 PR([("Supuestos. ", "b"), ("Para que las inferencias (pruebas t, F e intervalos) sean válidas, el modelo clásico supone que: "
@@ -292,19 +397,21 @@ PR([("Estimación por mínimos cuadrados ordinarios (MCO). ", "b"),
     ("Los estimadores a y b son los que minimizan la suma de los cuadrados de los residuos, Σ(Yi − Ŷi)². Definiendo "
      "Sxx = Σ(Xi − X̄)², Syy = Σ(Yi − Ȳ)² y Sxy = Σ(Xi − X̄)(Yi − Ȳ), se obtiene:", "")])
 EQ("b = Sxy / Sxx          a = Ȳ − b·X̄")
-P("La varianza de los errores se estima con el cuadrado medio del error, s² = SCE / (n − 2), donde SCE = Σ(Yi − Ŷi)² "
-  "es la suma de cuadrados del error. Su raíz, s, es el error estándar de la estimación.")
+P("La varianza del modelo, σ², se estima con el cuadrado medio del error (residual): s_yx² = CME = SCRes / (n − 2), "
+  "con n − 2 grados de libertad (98 en nuestro caso), donde SCRes = Σ(Yi − Ŷi)² es la suma de cuadrados residual. "
+  "Su raíz, s_yx, es el error estándar (error típico) de la estimación.")
 PR([("Inferencias sobre A y B. ", "b"),
     ("Bajo los supuestos, los estadísticos (b − B)/s_b y (a − A)/s_a siguen una distribución t de Student con n − 2 grados "
      "de libertad, donde", "")])
-EQ("s_b = s / √Sxx          s_a = s · √( 1/n + X̄² / Sxx )")
+EQ("s_b = s_yx / √Sxx          s_a = s_yx · √( 1/n + X̄² / Sxx )")
 P("Con ellos se construyen los intervalos de confianza b ± t(α/2; n−2)·s_b y a ± t(α/2; n−2)·s_a, y se prueban las hipótesis "
   "H0: B = 0 (X no explica a Y) y H0: A = 0. Se rechaza H0 si |t calculado| > t crítico, o lo que es igual, si el valor p es menor que α.")
 PR([("Intervalos para μy|x y para Ya. ", "b"),
     ("Para un valor X0, la estimación puntual es Ŷ0 = a + b·X0. El intervalo de confianza para la media de Y en X0 "
-     "(un punto de la recta poblacional) y el intervalo de predicción para un valor individual Ya son:", "")])
-EQ("μy|x0:   Ŷ0 ± t(α/2; n−2) · s · √( 1/n + (X0 − X̄)² / Sxx )")
-EQ("Ya:   Ŷ0 ± t(α/2; n−2) · s · √( 1 + 1/n + (X0 − X̄)² / Sxx )")
+     "(un punto de la recta poblacional, E(Y|X0)) y el intervalo de predicción para un valor individual Ya usan los "
+     "siguientes errores estándar:", "")])
+EQ("S_Ŷ0 = s_yx · √( 1/n + (X0 − X̄)² / Sxx )          S_Ya = s_yx · √( 1 + 1/n + (X0 − X̄)² / Sxx )")
+EQ("E(Y|X0) = μy|x0:   Ŷ0 ± t(α/2; n−2) · S_Ŷ0          Ya:   Ŷ0 ± t(α/2; n−2) · S_Ya")
 P("El intervalo de predicción siempre es más ancho, porque además de la incertidumbre sobre la recta incluye la "
   "variabilidad propia de cada observación.")
 PR([("Coeficiente de correlación. ", "b"),
@@ -313,15 +420,16 @@ PR([("Coeficiente de correlación. ", "b"),
      "de confianza para ρ se usa la transformación z de Fisher, z = ½·ln[(1 + r)/(1 − r)], que es aproximadamente normal "
      "con error estándar 1/√(n − 3).", "")])
 PR([("Coeficiente de determinación y ANOVA. ", "b"),
-    ("La variación total de Y se descompone en SCT = SCR + SCE, donde SCT = Syy es la suma de cuadrados total, "
-     "SCR = Σ(Ŷi − Ȳ)² es la suma de cuadrados de la regresión y SCE la del error. El coeficiente de determinación "
-     "R² = SCR / SCT indica la proporción de la variación de Y explicada por X; en regresión simple R² = r². "
-     "La tabla ANOVA compara el cuadrado medio de la regresión con el del error mediante F = CMR / CME, que bajo H0: B = 0 "
+    ("La variación total de Y se descompone en SCT = SCReg + SCRes, donde SCT = Syy es la suma de cuadrados total, "
+     "SCReg = Σ(Ŷi − Ȳ)² es la suma de cuadrados de la regresión y SCRes la residual. El coeficiente de determinación "
+     "R² = SCReg / SCT indica la proporción de la variación de Y explicada por X; en regresión simple R² = r². "
+     "La tabla ANOVA compara el cuadrado medio de la regresión con el residual mediante F = CMReg / CME, que bajo H0: B = 0 "
      "sigue una distribución F con 1 y n − 2 grados de libertad. En regresión simple se cumple que F = t² de la pendiente.", "")])
 PR([("Pruebas de los supuestos. ", "b"),
-    ("La normalidad de los residuos se verifica con las pruebas de Shapiro-Wilk, Kolmogorov-Smirnov con corrección de "
-     "Lilliefors y Jarque-Bera, además del gráfico Q-Q. La homocedasticidad se verifica con las pruebas de Breusch-Pagan "
-     "y de White, y con el gráfico de residuos contra valores ajustados. La linealidad se evalúa con el diagrama de "
+    ("La normalidad de los residuos se verifica en primer lugar con la inspección del gráfico P-P normal de regresión "
+     "de residuo tipificado y del histograma del residuo tipificado con curva normal; como pruebas de bondad de ajuste "
+     "complementarias se usan Shapiro-Wilk, Kolmogorov-Smirnov con corrección de Lilliefors y Jarque-Bera. La homocedasticidad se verifica con el gráfico de dispersión del residuo tipificado (ZRESID) contra el "
+     "pronóstico tipificado (ZPRED) y con las pruebas de Breusch-Pagan y de White. La linealidad se evalúa con el diagrama de "
      "dispersión y con la prueba RESET de Ramsey. La independencia se revisa con el estadístico de Durbin-Watson, que "
      "debe estar cerca de 2. En todas las pruebas la hipótesis nula es que el supuesto se cumple.", "")])
 PR([("Transformación logarítmica. ", "b"),
@@ -434,28 +542,31 @@ for k in s1:
 filas[-1][3] = f(s2["Durbin-Watson (independencia)"][0], 3)
 TABLA("Pruebas de los supuestos del modelo sobre los residuos",
       ["Prueba", "Modelo 1 estadístico", "Modelo 1 valor p", "Modelo 2 estadístico", "Modelo 2 valor p"], filas, [6.0, 2.6, 2.3, 2.6, 2.3], tam=9.5)
-FIG("figuras/fig05_residuos_lineal.png", "Diagnóstico de residuos del Modelo 1 (PIB en escala original)", 16)
+FIG("figuras/fig05_residuos_lineal.png", "Gráfico P-P normal, histograma con curva normal y ZPRED vs ZRESID del Modelo 1 (PIB en escala original)", 16)
 P("En el Modelo 1 el problema principal es la linealidad. La prueba RESET rechaza con mucha fuerza la hipótesis de que "
-  "la forma lineal es correcta (p < 0,001) y en el gráfico de residuos contra ajustados se ve una curva: residuos negativos "
-  "en los extremos y positivos en el centro. Además, las tres pruebas de normalidad rechazan H0 y la prueba de White "
+  "la forma lineal es correcta (p < 0,001) y en los residuos se ve una curva: residuos negativos "
+  "en los extremos y positivos en el centro, visible en el gráfico ZPRED vs ZRESID. Además, las tres pruebas de normalidad rechazan H0 y la prueba de White "
   "detecta heterocedasticidad. Por eso no es recomendable usar el Modelo 1 para hacer inferencias ni predicciones.")
-FIG("figuras/fig06_residuos_log.png", "Diagnóstico de residuos del Modelo 2 (ln del PIB)", 16)
-P("En el Modelo 2 la situación mejora mucho. El gráfico de residuos ya no muestra una curva marcada y el estadístico "
+FIG("figuras/fig06_residuos_log.png", "Gráfico P-P normal, histograma con curva normal y ZPRED vs ZRESID del Modelo 2 (ln del PIB)", 16)
+P("En el Modelo 2 la situación mejora mucho. El gráfico ZPRED vs ZRESID ya no muestra una curva marcada y el estadístico "
   "RESET baja de 44,6 a 6,2. Sobre cada supuesto concluimos lo siguiente:")
 VIÑETA("Linealidad: la relación entre ln(PIB) y la esperanza de vida es aproximadamente lineal, como se ve en el Gráfico 4. "
        "La prueba RESET todavía da p = 0,014, lo que indica una curvatura leve en los extremos que no cambia las conclusiones.")
-VIÑETA("Normalidad: la prueba de Lilliefors no rechaza la normalidad (p = 0,261). Shapiro-Wilk (p = 0,030) y Jarque-Bera "
-       "(p = 0,044) la rechazan al 5 % pero no al 1 %. El gráfico Q-Q muestra que casi todos los puntos siguen la recta y que "
-       "la desviación viene de pocos países en la cola izquierda (Nigeria, Chad y Guyana). Con n = 100, el teorema central "
+VIÑETA("Normalidad: en el gráfico P-P normal de regresión de residuo tipificado los puntos siguen de cerca la diagonal, y el "
+       "histograma del residuo tipificado con curva normal (media 0, desviación típica 0,995) tiene forma aproximadamente "
+       "acampanada; la única desviación visible viene de pocos países en la cola izquierda (Nigeria, Chad y Guyana, con "
+       "residuos tipificados cercanos a −3). Como pruebas de bondad de ajuste complementarias, Lilliefors no rechaza la "
+       "normalidad (p = 0,261), mientras que Shapiro-Wilk (p = 0,030) y Jarque-Bera (p = 0,044) la rechazan al 5 % pero no al 1 %. Con n = 100, el teorema central "
        "del límite garantiza que los estimadores a y b tienen distribución aproximadamente normal, así que las pruebas t y F son "
        "confiables.")
-VIÑETA("Homocedasticidad: Breusch-Pagan (p = 0,005) y White (p = 0,014) detectan heterocedasticidad. En el gráfico se nota "
+VIÑETA("Homocedasticidad: Breusch-Pagan (p = 0,005) y White (p = 0,014) detectan heterocedasticidad. En el gráfico ZPRED vs ZRESID se nota "
        "que la dispersión de los residuos es algo mayor en los países de ingreso bajo y medio que en los ricos, cuyos valores "
        "se concentran entre 80 y 85 años. Para comprobar que esto no afecta las conclusiones recalculamos los errores estándar "
        f"con el método robusto HC3 de White: el error estándar de b pasa de {f(G['se_b'],4)} a {f(log.ols_hc3.bse[1],4)} y "
        f"el estadístico t de {f(G['t_b'],2)} a {f(log.ols_hc3.tvalues[1],2)}, de modo que b sigue siendo altamente significativa.")
 VIÑETA(f"Independencia: los datos son de corte transversal (un dato por país), así que no hay orden temporal. El estadístico "
-       f"de Durbin-Watson es {f(s2['Durbin-Watson (independencia)'][0],2)}, muy cerca de 2, y no indica autocorrelación.")
+       f"de Durbin-Watson, que se reporta en la tabla Resumen del modelo, es {f(s2['Durbin-Watson (independencia)'][0],3)}. "
+       "Como está muy cerca de 2 (y dentro del intervalo habitual de 1,5 a 2,5), no hay indicios de autocorrelación de los residuos.")
 P("En conclusión, el Modelo 2 cumple razonablemente los supuestos y es claramente superior al Modelo 1. A partir de aquí "
   "lo usamos como modelo principal; en los puntos 5, 10 y 11 mostramos también los resultados del Modelo 1 para comparar.")
 
@@ -471,14 +582,12 @@ P(f"Para el Modelo 2: b = Sxy / Sxx = {f(G['sxy'],4)} / {f(G['sxx'],4)} = {f(G['
   f"a = Ȳ − b·X̄ = {f(G['ym'],4)} − {f(G['b'],4)} × {f(G['xm'],4)} = {f(G['a'],4)}. Las ecuaciones estimadas son:", sangria=False)
 EQ(f"Modelo 1:   Ŷ = {f(L['a'],4)} + {fe(L['b'],6)} · PIB")
 EQ(f"Modelo 2:   Ŷ = {f(G['a'],4)} + {f(G['b'],4)} · ln(PIB)")
-TABLA("Coeficientes estimados de los dos modelos",
-      ["Modelo", "Coeficiente", "Estimación", "Error estándar", "t", "Valor p"],
-      [["Modelo 1", "a (intercepto)", f(L["a"], 4), f(L["se_a"], 4), f(L["t_a"], 2), fp(L["p_a"])],
-       ["", "b (pendiente)", fe(L["b"], 7), fe(L["se_b"], 7), f(L["t_b"], 2), fp(L["p_b"])],
-       ["Modelo 2", "a (intercepto)", f(G["a"], 4), f(G["se_a"], 4), f(G["t_a"], 2), fp(G["p_a"])],
-       ["", "b (pendiente)", f(G["b"], 4), f(G["se_b"], 4), f(G["t_b"], 2), fp(G["p_b"])]],
-      [2.4, 3.0, 2.8, 2.8, 2.0, 2.0])
-P(f"El error estándar de la estimación es s = {f(L['s'],3)} años en el Modelo 1 y s = {f(G['s'],3)} años en el Modelo 2. "
+P("Las tablas siguientes presentan los coeficientes con la estructura de salida de SPSS. En la fila (Constante) está "
+  "el intercepto a y en la fila de la variable independiente la pendiente b; el coeficiente estandarizado Beta coincide "
+  "con r en la regresión simple.", sangria=False)
+tabla_coef(log, "Coeficientes(a) del Modelo 2: Y = a + b·ln(PIB)")
+tabla_coef(lin, "Coeficientes(a) del Modelo 1: Y = a + b·PIB")
+P(f"El error estándar de la estimación es s_yx = {f(L['s'],3)} años en el Modelo 1 y s_yx = {f(G['s'],3)} años en el Modelo 2. "
   "Es decir, con ln(PIB) las predicciones se equivocan en promedio casi 2,2 años menos.")
 
 H2("6. Interpretación de a y b")
@@ -501,11 +610,20 @@ PR([("Modelo 1. ", "b"),
 
 H2("7. Inferencias sobre A y B poblacionales")
 P(f"Trabajamos con α = 0,05 y n − 2 = {G['gl']} grados de libertad, por lo que el valor crítico de la t de Student "
-  f"para una prueba bilateral es t(0,025; 98) = {f(G['tcrit'],4)}.")
+  f"para una prueba bilateral es t(0,025; 98) = {f(G['tcrit'],4)}. Los valores de b, s_b, t, Sig. y los límites del "
+  "intervalo para B se leen en la tabla Coeficientes(a) del punto 5.")
+PR([("Nota metodológica. ", "b"),
+    (f"Como el tamaño muestral es grande (n = 100 > 30), la distribución t de Student con 98 grados de libertad converge "
+     f"asintóticamente a la normal estándar Z: el valor crítico t(0,025; 98) = {f(G['tcrit'],4)} es prácticamente igual a "
+     f"Z(0,975) = 1,96. Por eso el estadístico t que reporta la salida de SPSS es equivalente al contraste clásico Z de la "
+     f"guía de teoría, y la decisión es la misma con cualquiera de los dos valores críticos (|t| = {f(G['t_b'],2)} supera "
+     "con holgura a ambos).", "")])
 PR([("Prueba sobre la pendiente B. ", "b"), ("H0: B = 0 (el PIB no influye en la esperanza de vida) contra H1: B ≠ 0.", "")])
 EQ(f"t = b / s_b = {f(G['b'],4)} / {f(G['se_b'],4)} = {f(G['t_b'],2)}")
 P(f"Como |t| = {f(G['t_b'],2)} > {f(G['tcrit'],4)} (valor p < 0,001), rechazamos H0. Hay evidencia muy fuerte de que la "
-  "pendiente poblacional es distinta de cero, es decir, el logaritmo del PIB per cápita sí explica la esperanza de vida.")
+  "pendiente poblacional es distinta de cero, es decir, el logaritmo del PIB per cápita sí explica la esperanza de vida. "
+  f"Además, como se verá en el punto 11, t_b² = {f(G['t_b'],4)}² = {f(G['t_b']**2,2)} = F de la tabla ANOVA, igualdad "
+  "que siempre se cumple en la regresión simple.")
 PR([("Prueba sobre el intercepto A. ", "b"), ("H0: A = 0 contra H1: A ≠ 0.", "")])
 EQ(f"t = a / s_a = {f(G['a'],4)} / {f(G['se_a'],4)} = {f(G['t_a'],2)}")
 P(f"Como |t| = {f(G['t_a'],2)} > {f(G['tcrit'],4)} (valor p < 0,001), también rechazamos H0: el intercepto poblacional es distinto de cero.")
@@ -521,7 +639,7 @@ TABLA("Inferencias sobre A y B (Modelo 2): errores estándar clásicos y robusto
       [["A", f(G["a"], 4), f(G["se_a"], 4), f"({f(G['ic_a'][0],2)} ; {f(G['ic_a'][1],2)})", f(hc.bse[0], 4), f"({f(hc.conf_int()[0][0],2)} ; {f(hc.conf_int()[0][1],2)})"],
        ["B", f(G["b"], 4), f(G["se_b"], 4), f"({f(G['ic_b'][0],3)} ; {f(G['ic_b'][1],3)})", f(hc.bse[1], 4), f"({f(hc.conf_int()[1][0],3)} ; {f(hc.conf_int()[1][1],3)})"]],
       [2.0, 2.4, 2.6, 3.3, 2.4, 3.3], tam=9.5)
-P("Como vimos en los supuestos, hay algo de heterocedasticidad, por eso la Tabla 8 compara los resultados con los "
+P("Como vimos en los supuestos, hay algo de heterocedasticidad, por eso la Tabla 9 compara los resultados con los "
   "errores robustos HC3. Los intervalos casi no cambian y las conclusiones son las mismas.")
 
 H2("8. Intervalo para la recta μy|x y para un valor particular Ya")
@@ -529,9 +647,12 @@ v = df[df.pais == "Venezuela"].iloc[0]; iv = log.intervalos(v.pib_pc_usd_2024)
 P(f"Aplicamos los intervalos al caso de Venezuela, con X0 = 4.244,5 dólares, es decir, ln(X0) = {f(iv['x0'],4)}. "
   "La estimación puntual es:", sangria=False)
 EQ(f"Ŷ0 = {f(G['a'],4)} + {f(G['b'],4)} × {f(iv['x0'],4)} = {f(iv['y0'],2)} años")
-P(f"Los errores estándar son s·√(1/n + (X0 − X̄)²/Sxx) = {f(iv['se_media'],4)} para la media y "
-  f"s·√(1 + 1/n + (X0 − X̄)²/Sxx) = {f(iv['se_pred'],4)} para un valor individual. Con t = {f(G['tcrit'],4)}:", sangria=False)
-EQ(f"IC 95 % para μy|x0:   {f(iv['y0'],2)} ± {f(G['tcrit']*iv['se_media'],2)}  →  ({f(iv['ic_media'][0],2)} ; {f(iv['ic_media'][1],2)}) años")
+P(f"Los errores estándar de la respuesta media E(Y|X0) y del valor individual Ya se obtienen con las fórmulas de la "
+  f"cátedra, usando s_yx = {f(G['s'],4)}, n = 100, X̄ = {f(G['xm'],4)} y Sxx = {f(G['sxx'],4)}:", sangria=False)
+EQ(f"S_Ŷ0 = s_yx·√( 1/n + (X0 − X̄)²/Sxx ) = {f(G['s'],4)} × √( 1/100 + ({f(iv['x0'],4)} − {f(G['xm'],4)})² / {f(G['sxx'],4)} ) = {f(iv['se_media'],4)}")
+EQ(f"S_Ya = s_yx·√( 1 + 1/n + (X0 − X̄)²/Sxx ) = {f(G['s'],4)} × √( 1 + 1/100 + ({f(iv['x0'],4)} − {f(G['xm'],4)})² / {f(G['sxx'],4)} ) = {f(iv['se_pred'],4)}")
+P(f"Con t(0,025; 98) = {f(G['tcrit'],4)}, los intervalos al 95 % son:", sangria=False)
+EQ(f"IC 95 % para E(Y|X0) = μy|x0:   {f(iv['y0'],2)} ± {f(G['tcrit']*iv['se_media'],2)}  →  ({f(iv['ic_media'][0],2)} ; {f(iv['ic_media'][1],2)}) años")
 EQ(f"IC 95 % para Ya:   {f(iv['y0'],2)} ± {f(G['tcrit']*iv['se_pred'],2)}  →  ({f(iv['ic_pred'][0],2)} ; {f(iv['ic_pred'][1],2)}) años")
 P(f"Interpretación: con 95 % de confianza, la esperanza de vida media de todos los países con un PIB per cápita de "
   f"4.244,5 dólares está entre {f(iv['ic_media'][0],2)} y {f(iv['ic_media'][1],2)} años. Para un país en particular con "
@@ -543,9 +664,9 @@ for p_ in ["Venezuela", "Nigeria", "Costa Rica", "Japón", "Estados Unidos"]:
     x = df[df.pais == p_].iloc[0]; i_ = log.intervalos(x.pib_pc_usd_2024)
     filas.append([p_, f(x.pib_pc_usd_2024, 1), f(i_["y0"], 2), f"({f(i_['ic_media'][0],2)} ; {f(i_['ic_media'][1],2)})",
                   f"({f(i_['ic_pred'][0],2)} ; {f(i_['ic_pred'][1],2)})", f(x.esperanza_vida_2024, 2)])
-TABLA("Estimaciones e intervalos al 95 % para países seleccionados (Modelo 2)",
-      ["País", "PIB pc (US$)", "Ŷ0", "IC para μy|x", "IC para Ya", "Y observado"], filas, [3.0, 2.4, 1.6, 3.4, 3.4, 2.2], tam=9.5)
-P("La Tabla 9 repite el cálculo para otros países de interés. Los intervalos para la media son estrechos porque, con "
+TABLA("Estimaciones e intervalos al 95 % para Venezuela y países de contraste de ingresos bajos y altos (Modelo 2)",
+      ["País", "PIB pc (US$)", "Ŷ0", "IC para E(Y|X0)", "IC para Ya", "Y observado"], filas, [3.0, 2.4, 1.6, 3.4, 3.4, 2.2], tam=9.5)
+P("La Tabla 10 repite el cálculo para otros países de interés. Los intervalos para la media son estrechos porque, con "
   "100 países, la recta está bien estimada; los de predicción son más anchos, de unos ±7 años, porque además incluyen la "
   "variación propia de cada país. Los intervalos son más anchos lejos de X̄ (por ejemplo en Estados Unidos o Nigeria) que "
   "cerca de ella. Nigeria y Estados Unidos quedan por fuera o al borde de sus intervalos de predicción, lo que confirma que "
@@ -557,7 +678,9 @@ P(f"El coeficiente de correlación muestral entre ln(PIB) y la esperanza de vida
 EQ(f"t = r·√(n − 2) / √(1 − r²) = {f(G['r'],4)} × √98 / √(1 − {f(G['r2'],4)}) = {f(G['t_r'],2)}")
 P(f"Como {f(G['t_r'],2)} > {f(G['tcrit'],4)} (valor p < 0,001), rechazamos H0: existe una correlación lineal "
   "significativa entre las variables en la población. Este estadístico es exactamente igual al t de la pendiente, como "
-  "debe ocurrir en regresión simple.")
+  "debe ocurrir en regresión simple, y por lo tanto también se cumple t² = F del ANOVA. Al igual que en el punto 7, con "
+  f"n = 100 > 30 la t con 98 grados de libertad es prácticamente una normal estándar, de modo que comparar con "
+  f"t(0,025; 98) = {f(G['tcrit'],4)} o con Z(0,975) = 1,96 lleva a la misma decisión.")
 P(f"Para el intervalo de confianza usamos la transformación de Fisher: z = ½·ln[(1 + r)/(1 − r)] = {f(G['z_fisher'],4)}, "
   f"con error estándar 1/√97 = {f(1/np.sqrt(97),4)}. El intervalo para z es {f(G['z_fisher'],4)} ± 1,96 × "
   f"{f(1/np.sqrt(97),4)} y, devolviéndolo a la escala de r con la tangente hiperbólica, obtenemos:", sangria=False)
@@ -568,17 +691,20 @@ P(f"Con 95 % de confianza, la correlación poblacional está entre {f(G['ic_rho'
   "es bastante más fuerte en escala logarítmica.")
 
 H2("10. Coeficiente de determinación")
-EQ(f"R² = SCR / SCT = {f(G['scr'],2)} / {f(G['sct'],2)} = {f(G['r2'],4)}")
+tabla_resumen(log, "Resumen del modelo(b) del Modelo 2")
+EQ(f"R² = SCReg / SCT = {f(G['scr'],2)} / {f(G['sct'],2)} = {f(G['r2'],4)}")
 P(f"El {f(100*G['r2'],1)} % de la variación de la esperanza de vida entre los 100 países se explica por la variación del "
   f"logaritmo del PIB per cápita. El {f(100*(1-G['r2']),1)} % restante se debe a otros factores que no están en el modelo, "
   "como el acceso a servicios de salud, la educación, la desigualdad, los conflictos armados, el VIH o la alimentación. "
-  f"El R² ajustado es {f(G['r2_aj'],4)}, prácticamente igual porque solo hay una variable explicativa.")
+  f"El R cuadrado corregido es {f(G['r2_aj'],4)}, prácticamente igual porque solo hay una variable explicativa. Se cumple "
+  f"la identidad SCT = SCReg + SCRes: {f(G['sct'],2)} = {f(G['scr'],2)} + {f(G['sce'],2)}.")
 P(f"En el Modelo 1 el coeficiente de determinación es apenas R² = {f(L['r2'],4)} ({f(100*L['r2'],1)} %). Es decir, solo "
   "con cambiar la forma funcional, sin agregar ninguna variable, la capacidad explicativa sube de 44 % a 79 %.")
+tabla_resumen(lin, "Resumen del modelo(b) del Modelo 1, para comparar")
 FIG("figuras/fig07_descomposicion.png", "Descomposición de la variación total de la esperanza de vida (Modelo 2)", 14)
 
 H2("11. Análisis de varianza (ANOVA)")
-P("La tabla ANOVA prueba la significación global del modelo: H0: B = 0 (el modelo no explica nada) contra H1: B ≠ 0. "
+P("La tabla ANOVA, en la estructura de salida de SPSS, prueba la significación global del modelo: H0: B = 0 (el modelo no explica nada) contra H1: B ≠ 0. "
   f"El valor crítico es F(0,05; 1; 98) = {f(G['Fcrit'],4)}.")
 def tabla_anova(m, titulo):
     a = m.anova()
@@ -589,13 +715,15 @@ def tabla_anova(m, titulo):
                       "" if np.isnan(r["F calculado"]) else f(r["F calculado"], 2),
                       "" if np.isnan(r["Valor p"]) else fp(r["Valor p"])])
     TABLA(titulo, ["Fuente de variación", "Suma de cuadrados", "gl", "Cuadrado medio", "F", "Valor p"], filas, [3.8, 3.2, 1.3, 3.0, 2.0, 2.0])
-tabla_anova(log, "Tabla ANOVA del Modelo 2 (Y = a + b·ln PIB)")
+tabla_anova_spss(log, "ANOVA(a) del Modelo 2: Y = a + b·ln(PIB)")
 P(f"Como F = {f(G['F'],2)} > {f(G['Fcrit'],4)} (valor p < 0,001), rechazamos H0: el modelo es significativo en su "
   f"conjunto. Se cumple además que F = t² ({f(G['t_b'],4)}² = {f(G['t_b']**2,2)}), por lo que en regresión simple la "
-  "prueba F y la prueba t de la pendiente llevan a la misma conclusión. El cuadrado medio del error, "
-  f"CME = {f(G['s2'],4)}, es la estimación de σ², y su raíz es el error estándar s = {f(G['s'],3)} años.")
-tabla_anova(lin, "Tabla ANOVA del Modelo 1 (Y = a + b·PIB), para comparar")
-P(f"El Modelo 1 también es significativo (F = {f(L['F'],2)}), pero su suma de cuadrados del error es {f(L['sce'],1)}, "
+  "prueba F y la prueba t de la pendiente llevan a la misma conclusión (equivalencia fundamental t_b² = F en la "
+  "regresión simple). La media cuadrática residual, "
+  f"CME = s_yx² = {f(G['s2'],4)} con 98 grados de libertad, es la estimación de σ², y su raíz es el error típico de la "
+  f"estimación s_yx = {f(G['s'],3)} años. La tabla también verifica la identidad SCT = SCReg + SCRes.")
+tabla_anova_spss(lin, "ANOVA(a) del Modelo 1: Y = a + b·PIB, para comparar")
+P(f"El Modelo 1 también es significativo (F = {f(L['F'],2)}), pero su suma de cuadrados residual es {f(L['sce'],1)}, "
   f"más del doble que la del Modelo 2 ({f(G['sce'],1)}), lo que confirma que deja mucha más variación sin explicar.")
 
 # ======================= CONCLUSIONES =======================

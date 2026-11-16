@@ -23,6 +23,11 @@ lin, log = modelos(df)
 y = df["esperanza_vida_2024"]
 
 def guardar(nombre):
+    # coma decimal en los ejes numéricos por defecto
+    for a in plt.gcf().axes:
+        for eje in (a.xaxis, a.yaxis):
+            if type(eje.get_major_formatter()) is matplotlib.ticker.ScalarFormatter:
+                eje.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v:g}".replace(".", ",")))
     plt.savefig(f"figuras/{nombre}.png"); plt.close()
 
 # Fig 1: histogramas
@@ -81,21 +86,33 @@ def dispersion(m, nombre, xlabel, escala_log):
 dispersion(lin, "fig03_dispersion_lineal", "PIB per cápita 2024 (US$)", False)
 dispersion(log, "fig04_dispersion_log", "PIB per cápita 2024 (US$, escala logarítmica)", True)
 
-# Fig 5 y 6: diagnóstico de residuos
+# Fig 5 y 6: diagnóstico de residuos con la presentación habitual de SPSS
+# (residuo tipificado ZRESID = e / s_yx, pronóstico tipificado ZPRED)
 def diagnostico(m, nombre):
-    e, yh = m.res["e"], m.res["yhat"]
-    fig, ax = plt.subplots(1, 3, figsize=(11, 3.3))
-    ax[0].scatter(yh, e, s=22, c=AZUL, edgecolor="white", linewidth=.8)
-    ax[0].axhline(0, color=TINTA, lw=1); ax[0].set_xlabel("Valores ajustados (Ŷ)"); ax[0].set_ylabel("Residuos")
-    ax[0].set_title("Residuos vs ajustados", fontsize=10)
-    (osm, osr), (sl, ic, _) = stats.probplot(e, dist="norm")
-    ax[1].scatter(osm, osr, s=22, c=AZUL, edgecolor="white", linewidth=.8)
-    ax[1].plot(osm, sl * osm + ic, color=NARANJA, lw=1.5)
-    ax[1].set_xlabel("Cuantiles teóricos N(0,1)"); ax[1].set_ylabel("Residuos ordenados"); ax[1].set_title("Gráfico Q-Q normal", fontsize=10)
-    ax[2].hist(e, bins=14, density=True, color=AZUL, edgecolor="white", linewidth=1.5)
-    xs = np.linspace(e.min(), e.max(), 200); ax[2].plot(xs, stats.norm.pdf(xs, 0, e.std(ddof=1)), color=NARANJA, lw=1.5)
-    ax[2].set_xlabel("Residuos"); ax[2].set_ylabel("Densidad"); ax[2].set_title("Histograma de residuos", fontsize=10)
-    fig.subplots_adjust(wspace=.38)
+    e, yh, s = m.res["e"], m.res["yhat"], m.res["s"]
+    zres = e / s
+    zpred = (yh - yh.mean()) / yh.std(ddof=1)
+    n = len(e)
+    fig, ax = plt.subplots(1, 3, figsize=(11, 3.4))
+    # Gráfico P-P normal de regresión de residuo tipificado
+    obs = (np.arange(1, n + 1) - 0.5) / n
+    esp = stats.norm.cdf(np.sort(zres))
+    ax[0].plot([0, 1], [0, 1], color=NARANJA, lw=1.5)
+    ax[0].scatter(obs, esp, s=20, facecolor="none", edgecolor=AZUL, linewidth=1)
+    ax[0].set_xlabel("Prob. acum. observada"); ax[0].set_ylabel("Prob. acum. esperada")
+    ax[0].set_title("Gráfico P-P normal de regresión\nde residuo tipificado", fontsize=9.5)
+    # Histograma del residuo tipificado con curva normal
+    ax[1].hist(zres, bins=14, density=True, color=AZUL, edgecolor="white", linewidth=1.5)
+    xs = np.linspace(-4, 3, 200); ax[1].plot(xs, stats.norm.pdf(xs, zres.mean(), zres.std(ddof=1)), color=NARANJA, lw=1.5)
+    ax[1].set_xlabel("Regresión residuo tipificado"); ax[1].set_ylabel("Densidad")
+    media = f"{abs(zres.mean()):.2f}".replace(".", ","); dt = f"{zres.std(ddof=1):.3f}".replace(".", ",")
+    ax[1].set_title(f"Histograma con curva normal\nMedia = {media}   Desv. típ. = {dt}   N = {n}", fontsize=9.5)
+    # Dispersión ZPRED vs ZRESID
+    ax[2].scatter(zpred, zres, s=20, facecolor="none", edgecolor=AZUL, linewidth=1)
+    ax[2].axhline(0, color=TINTA, lw=1)
+    ax[2].set_xlabel("Regresión valor pronosticado tipificado"); ax[2].set_ylabel("Regresión residuo tipificado")
+    ax[2].set_title("Gráfico de dispersión\nZPRED vs ZRESID", fontsize=9.5)
+    fig.subplots_adjust(wspace=.4)
     guardar(nombre)
 diagnostico(lin, "fig05_residuos_lineal")
 diagnostico(log, "fig06_residuos_log")
@@ -104,8 +121,8 @@ diagnostico(log, "fig06_residuos_log")
 r = log.res
 fig, a = plt.subplots(figsize=(7.5, 1.6))
 a.barh([0], [r["scr"]], color=AZUL, height=.5); a.barh([0], [r["sce"]], left=[r["scr"]], color=GRIS, height=.5)
-a.text(r["scr"] / 2, 0, f"SCR = {r['scr']:,.1f}  ({100*r['r2']:.1f} %)".replace(",", "X").replace(".", ",").replace("X", "."), ha="center", va="center", color="white", fontsize=9)
-a.text(r["scr"] + r["sce"] / 2, 0, f"SCE = {r['sce']:,.1f}".replace(",", "X").replace(".", ",").replace("X", "."), ha="center", va="center", color=TINTA, fontsize=9)
+a.text(r["scr"] / 2, 0, f"SCReg = {r['scr']:,.1f}  ({100*r['r2']:.1f} %)".replace(",", "X").replace(".", ",").replace("X", "."), ha="center", va="center", color="white", fontsize=9)
+a.text(r["scr"] + r["sce"] / 2, 0, f"SCRes = {r['sce']:,.1f}".replace(",", "X").replace(".", ",").replace("X", "."), ha="center", va="center", color=TINTA, fontsize=9)
 a.set_yticks([]); a.set_xlabel("Suma de cuadrados (SCT = 5.638,7)"); a.grid(False)
 guardar("fig07_descomposicion")
 

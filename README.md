@@ -3,7 +3,7 @@
 Trabajo de **Estadística II**, Escuela de Estadística y Ciencias Actuariales, Facultad de Ciencias Económicas y Sociales, Universidad Central de Venezuela.
 
 - **Autores:** Allan Arcia y Eddie Palomino
-- **Profesoras:** Sandra Pinto y Yuraisi Carriles
+- **Profesoras:** Sandra Pinto y Yuraisi Capriles
 
 **App interactiva:** https://regresion-pib-esperanza-vida-uqp2vznznmjl5ge5z36kr8.streamlit.app
 
@@ -45,6 +45,7 @@ La relación es curva, así que el modelo principal es el logarítmico. Duplicar
 ├── data/                       # datos
 ├── figuras/                    # gráficos del informe
 ├── informe/generar_informe.py  # genera el informe en Word
+├── spss/                       # sintaxis de SPSS que replica el modelo (Resumen, ANOVA, Coeficientes, DW, P-P)
 └── presentacion/               # respaldo en PDF de la exposición
 ```
 
