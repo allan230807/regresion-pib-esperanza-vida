@@ -291,7 +291,8 @@ def construir(inf):
     eq("z = r·√(n − 2) / √(1 − r^{2}) = 0,6648 × √98 / √(1 − 0,4420) = 8,81")
     p("Como |z| = 8,81 > 1,96 (Sig. < 0,001), rechazamos H_{0}: hay correlación lineal entre las dos "
       "variables en la población. El valor coincide con el de la pendiente, como debe ocurrir en la "
-      "regresión bivariante.", sangria=False)
+      "regresión bivariante. Esto no contradice el punto 4: hay una tendencia lineal significativa, pero "
+      "la relación verdadera es curva, y por eso r es solo moderado.", sangria=False)
     inf.tabla("t05_correlaciones", "Correlación de Pearson entre el PIB per cápita y la esperanza de vida",
               "Salida de CORRELACIONES de IBM SPSS Statistics.")
     p("Para el intervalo usamos la transformación de Fisher: z_{r} = ½·ln(1,6648/0,3352) = 0,8014, con "

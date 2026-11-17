@@ -338,6 +338,8 @@ elif seccion == "9. Inferencias sobre ρ":
     st.markdown(
         """
 |z| = 8,81 > 1,96 (Sig. < 0,001): se rechaza H₀, hay correlación lineal en la población.
+Esto no contradice el punto 4: hay una tendencia lineal significativa, pero la relación es curva,
+por eso r es solo moderado.
 
 **Intervalo con la transformación de Fisher:** z<sub>r</sub> = ½·ln(1,6648/0,3352) = 0,8014, error
 estándar 1/√97 = 0,1015, intervalo 0,8014 ± 1,96 × 0,1015 = (0,6024; 1,0004). En la escala de r:
