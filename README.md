@@ -19,49 +19,40 @@ Las dos variables salen de **una sola base oficial**: los Indicadores del Desarr
 | Y | `SP.DYN.LE00.IN` | Esperanza de vida al nacer, total (años) |
 
 - `data/pib_esperanza_vida_2024.csv`: la muestra de 100 países (iso3, país, región, nivel de ingreso, grupo, X, Y).
-- `data/raw/wdi_2024_paises.csv`: copia de la descarga de la API del Banco Mundial para todos los países (15/11/2026). El PIB está redondeado a 1 decimal y la esperanza de vida a 3 decimales.
+- `data/raw/wdi_2024_paises.csv`: copia de la descarga de la API del Banco Mundial para todos los países (15/11/2026).
 - Se usó 2024 porque es el último año con ambos indicadores publicados. Sudán del Sur quedó fuera porque no tiene PIB de 2024.
 - Licencia de los datos: CC BY 4.0 (Banco Mundial).
 
 ## Resultados principales
 
-| | Modelo 1: Y = a + b·PIB | Modelo 2: Y = a + b·ln(PIB) |
-|---|---|---|
-| Ecuación | Ŷ = 70,1039 + 0,000177·PIB | **Ŷ = 33,9037 + 4,4519·ln(PIB)** |
-| r | 0,6648 | **0,8877** |
-| R² | 0,4420 | **0,7880** |
-| F (ANOVA) | 77,63 | **364,36** |
-| RESET (linealidad) | p < 0,001 | p = 0,014 |
+Todo el procesamiento se hizo en **IBM SPSS Statistics** con `spss/regresion_v6.sps`.
 
-La relación es curva, así que el modelo principal es el logarítmico. Duplicar el PIB per cápita se asocia con unos 3,09 años más de esperanza de vida. Para Venezuela (4.244,5 US$) el modelo predice 71,09 años, con intervalo de predicción al 95 % de (64,12; 78,06); el valor observado es 72,67.
+| | Y = a + b·X |
+|---|---|
+| Ecuación | Ŷ = 70,104 + 0,000177·X |
+| r | 0,665 |
+| r² | 0,442 |
+| z de la pendiente | 8,81 (Sig. < 0,001) |
+| F (ANOVA) | 77,632 (Sig. < 0,001) |
+| Durbin-Watson | 1,929 |
+
+La relación es positiva y significativa, pero moderada, y los gráficos de residuos muestran que no es lineal: el ingreso tiene rendimientos decrecientes. Para Venezuela (4.244,5 US$) la recta da 70,86 años; el valor observado es 72,67.
 
 ## Estructura
 
 ```
-├── app.py                      # aplicación Streamlit
-├── src/regresion.py            # fórmulas del curso (MCO, t, F, intervalos, supuestos)
-├── analisis.py                 # genera las figuras en figuras/
-├── descargar_datos.py          # arma la muestra (con --api vuelve a descargar del Banco Mundial)
-├── data/                       # datos
-├── figuras/                    # gráficos del informe
-├── informe/generar_informe.py  # genera el informe en Word
-├── spss/                       # sintaxis de SPSS que replica el modelo (Resumen, ANOVA, Coeficientes, DW, P-P)
-└── presentacion/               # respaldo en PDF de la exposición
+├── app.py                         # aplicación Streamlit (solo capturas de SPSS, más el mapa)
+├── spss/regresion_v6.sps          # sintaxis de SPSS que produce todas las tablas y gráficos
+├── figuras/spss_v6/               # capturas de la salida de SPSS
+├── informe/generar_informe_v6.py  # arma el informe (normas APA) en Word y PDF a partir de las capturas
+├── informe/contenido_v6.py        # texto del informe
+├── descargar_datos.py             # arma la muestra (con --api vuelve a descargar del Banco Mundial)
+└── data/                          # datos
 ```
-
-El informe en Word y la app usan el mismo módulo `src/regresion.py`, por eso los números coinciden.
 
 ## Cómo correrlo
 
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
-```
-
-Para regenerar figuras e informe:
-
-```bash
-python analisis.py
-pip install python-docx matplotlib
-python informe/generar_informe.py informe/Informe.docx informe/paginas_indice.json
 ```
