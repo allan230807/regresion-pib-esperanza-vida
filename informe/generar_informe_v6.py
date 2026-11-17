@@ -258,8 +258,13 @@ class Informe:
                 if i >= len(fila) - 2:
                     par.alignment = WD_ALIGN_PARAGRAPH.RIGHT
                 r = par.add_run(str(v)); r.font.size = Pt(10)
-        # bordes al estilo APA: líneas arriba y abajo del encabezado y al final
+        # anchos fijos de columna (LibreOffice lee los de tblGrid)
+        for col, w in zip(t._tbl.tblGrid.findall(qn("w:gridCol")), anchos):
+            col.set(qn("w:w"), str(int(w * 1440)))
         tblPr = t._tbl.tblPr
+        layout = OxmlElement("w:tblLayout"); layout.set(qn("w:type"), "fixed")
+        tblPr.append(layout)
+        # bordes al estilo APA: líneas arriba y abajo del encabezado y al final
         bordes = OxmlElement("w:tblBorders")
         for lado in ("top", "bottom"):
             e = OxmlElement(f"w:{lado}")
