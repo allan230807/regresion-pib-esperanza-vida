@@ -26,17 +26,11 @@ def construir(inf):
     p, h, eq = inf.p, inf.h, inf.eq
 
     # ------------------------------------------------------------ portada
-    for _ in range(3):
-        p("", sangria=False)
-    p("Regresión lineal bivariante: PIB per cápita y esperanza de vida al nacer en 100 países (2024)",
-      sangria=False, alin="c", negrita=True)
-    p("", sangria=False)
-    p("Allan Arcia y Eddie Palomino", sangria=False, alin="c")
-    p("Escuela de Estadística y Ciencias Actuariales, Facultad de Ciencias Económicas y Sociales, "
-      "Universidad Central de Venezuela", sangria=False, alin="c")
-    p("Estadística II", sangria=False, alin="c")
-    p("Prof. Sandra Pinto y Prof. Yuraisi Capriles", sangria=False, alin="c")
-    p("Noviembre de 2026", sangria=False, alin="c")
+    inf.portada("REGRESIÓN LINEAL BIVARIANTE ENTRE EL PIB PER CÁPITA Y LA ESPERANZA DE VIDA AL NACER "
+                "EN 100 PAÍSES EN EL AÑO 2024.",
+                ["Sandra Pinto", "Yuraisi Capriles", "Joaquín Rangel"],
+                ["Allan Arcia", "Eddie Palomino"],
+                "Ciudad Universitaria, 17 de Noviembre de 2026")
 
     # ------------------------------------------------------------ índice
     h(1, "Índice", en_indice=False, nueva_pagina=True)
