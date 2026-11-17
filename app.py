@@ -341,8 +341,9 @@ elif seccion == "9. Inferencias sobre ρ":
 
 **Intervalo con la transformación de Fisher:** z<sub>r</sub> = ½·ln(1,6648/0,3352) = 0,8014, error
 estándar 1/√97 = 0,1015, intervalo 0,8014 ± 1,96 × 0,1015 = (0,6024; 1,0004). En la escala de r:
-**IC 95 % para ρ = (0,539; 0,762)**.
+**IC 95 % para ρ = (0,539; 0,762)**, el mismo que da SPSS:
 """, unsafe_allow_html=True)
+    spss("t05b_ic_correlacion", "Intervalo de confianza para ρ con la transformación z de Fisher (IBM SPSS Statistics).")
 
 # ==========================================================================
 elif seccion == "10. Coeficiente de determinación":
