@@ -98,6 +98,7 @@ class Informe:
             doble(h.paragraph_format, sangria=False)
             h.paragraph_format.keep_with_next = True
         d.styles["Heading 1"].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        sec.different_first_page_header_footer = True  # la portada va sin número
         hp = sec.header.paragraphs[0]
         hp.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         campo_pagina(hp)
@@ -134,6 +135,68 @@ class Informe:
         if alin == "c":
             par.alignment = WD_ALIGN_PARAGRAPH.CENTER
         return self.corridas(par, texto, **kw)
+
+    # -- portada con el formato de la escuela (logos de la UCV y de la EECA)
+    def portada(self, titulo, profesores, estudiantes, lugar_fecha):
+        logos = Path(__file__).resolve().parent / "logos"
+
+        def linea(texto, negrita=False, antes=0):
+            par = self.doc.add_paragraph()
+            pf = par.paragraph_format
+            pf.line_spacing_rule = WD_LINE_SPACING.DOUBLE
+            pf.space_before = Pt(antes); pf.space_after = Pt(0); pf.first_line_indent = Inches(0)
+            par.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            r = par.add_run(texto); r.bold = negrita
+            return par
+
+        def sin_bordes(t):
+            b = OxmlElement("w:tblBorders")
+            for lado in ("top", "left", "bottom", "right", "insideH", "insideV"):
+                e = OxmlElement(f"w:{lado}"); e.set(qn("w:val"), "nil"); b.append(e)
+            t._tbl.tblPr.append(b)
+
+        def anchos(t, ws):
+            for col, w in zip(t._tbl.tblGrid.findall(qn("w:gridCol")), ws):
+                col.set(qn("w:w"), str(int(w * 1440)))
+            lay = OxmlElement("w:tblLayout"); lay.set(qn("w:type"), "fixed"); t._tbl.tblPr.append(lay)
+            for fila in t.rows:
+                for c, w in zip(fila.cells, ws):
+                    c.width = Inches(w)
+
+        # encabezado: logo UCV, nombres de la institución, logo EECA
+        t = self.doc.add_table(rows=1, cols=3); t.autofit = False
+        sin_bordes(t); anchos(t, [1.05, 4.6, 0.85])
+        izq, cen, der = t.rows[0].cells
+        izq.paragraphs[0].add_run().add_picture(str(logos / "ucv.png"), width=Inches(0.85))
+        der.paragraphs[0].add_run().add_picture(str(logos / "eeca.png"), width=Inches(0.7))
+        der.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        for i, txt in enumerate(["UNIVERSIDAD CENTRAL DE VENEZUELA", "FACULTAD DE CIENCIAS ECONÓMICAS Y SOCIALES",
+                                 "ESCUELA DE ESTADÍSTICA Y CIENCIAS ACTUARIALES"]):
+            par = cen.paragraphs[0] if i == 0 else cen.add_paragraph()
+            par.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            par.paragraph_format.line_spacing_rule = WD_LINE_SPACING.DOUBLE
+            par.paragraph_format.space_after = Pt(0)
+            par.add_run(txt)
+        linea("MATERIA: ESTADÍSTICA II")
+        linea(titulo, negrita=True, antes=72)
+
+        # profesores y estudiantes en dos columnas
+        n = max(len(profesores), len(estudiantes)) + 1
+        t = self.doc.add_table(rows=n, cols=2); t.autofit = False
+        sin_bordes(t); anchos(t, [3.25, 3.25])
+        cols = (["Profesores:"] + profesores, ["Estudiantes:"] + estudiantes)
+        for j, lista in enumerate(cols):
+            for i in range(n):
+                par = t.rows[i].cells[j].paragraphs[0]
+                par.paragraph_format.line_spacing_rule = WD_LINE_SPACING.DOUBLE
+                par.paragraph_format.space_after = Pt(0)
+                if j == 1:
+                    par.paragraph_format.left_indent = Inches(1.0)
+                if i < len(lista):
+                    par.add_run(lista[i])
+        t.rows[0].cells[0].paragraphs[0].paragraph_format.space_before = Pt(96)
+        t.rows[0].cells[1].paragraphs[0].paragraph_format.space_before = Pt(96)
+        linea(lugar_fecha, antes=84)
 
     def eq(self, texto):
         par = self.doc.add_paragraph()

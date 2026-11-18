@@ -114,7 +114,7 @@ if seccion == "Portada":
     )
     c1, c2 = st.columns([3, 2], gap="large")
     with c1:
-        spss("g04_dispersion", "Diagrama de dispersión con la recta de mínimos cuadrados (IBM SPSS Statistics).")
+        spss("g04b_dispersion_ic", "Diagrama de dispersión con la recta de regresión e intervalo de confianza al 95 % (IBM SPSS Statistics).")
     with c2:
         st.subheader("El trabajo en pocas líneas")
         st.markdown(
@@ -218,12 +218,15 @@ azules promedian 81,9 años y las zonas rojas 59,0.
 # ==========================================================================
 elif seccion == "3. Diagrama de dispersión":
     st.header("3. Diagrama de dispersión")
-    spss("g04_dispersion", "Diagrama de dispersión con la recta de mínimos cuadrados (GGRAPH, IBM SPSS Statistics).")
+    spss("g04b_dispersion_ic", "Diagrama de dispersión con la recta de regresión e intervalo de confianza al 95 % (GGRAPH, IBM SPSS Statistics).")
     st.markdown(
         """
 La relación es positiva, pero no sigue una recta. Hasta unos 20.000 dólares la esperanza de vida sube
 muy rápido y luego la nube se aplana entre 80 y 85 años. La recta pasa por encima de casi todos los
 países pobres, por debajo de muchos de ingreso medio y otra vez por encima de los más ricos.
+
+Las líneas rojas discontinuas son el **intervalo de confianza al 95 % para la media**: es angosto cerca
+del PIB medio y se abre hacia los extremos, sobre todo en los PIB altos, donde hay pocos países.
 
 Casos llamativos: Nigeria y Chad viven unos 15 años menos de lo que da la recta, Estados Unidos vive
 menos que otros países ricos y Guyana, con casi 30.000 dólares por el auge petrolero, vive 70,3 años.
@@ -232,20 +235,18 @@ menos que otros países ricos y Guyana, con casi 30.000 dólares por el auge pet
 # ==========================================================================
 elif seccion == "4. Verificación de supuestos":
     st.header("4. Verificación de supuestos")
-    st.markdown("Usamos los gráficos de residuos del procedimiento REGRESIÓN de SPSS y las pruebas de "
-                "normalidad, con α = 0,05.")
+    st.markdown("Usamos los gráficos de residuos del procedimiento REGRESIÓN de SPSS y el estadístico de "
+                "Durbin-Watson.")
     st.subheader("Normalidad")
     c1, c2 = st.columns(2)
     with c1:
         spss("g06_pp_zresid", "Gráfico P-P normal del residuo estandarizado (IBM SPSS Statistics).")
     with c2:
         spss("g05_histograma_zresid", "Histograma del residuo estandarizado (IBM SPSS Statistics).")
-    spss("t09_normalidad", "Pruebas de normalidad del residuo estandarizado (EXPLORAR, IBM SPSS Statistics).")
     st.markdown(
         """
 Los puntos del P-P se separan de la diagonal en el centro y el histograma tiene una cola larga a la
-izquierda (residuos cercanos a −3, de Nigeria y Chad). Kolmogorov-Smirnov (0,137) y Shapiro-Wilk
-(0,936) dan Sig. < 0,001, así que **se rechaza la normalidad**.
+izquierda (residuos cercanos a −3, de Nigeria y Chad), así que **los residuos no son normales**.
 """)
     st.subheader("Linealidad y homocedasticidad")
     spss("g07_zpred_zresid", "Residuo estandarizado contra pronóstico estandarizado (IBM SPSS Statistics).")
@@ -338,6 +339,8 @@ elif seccion == "9. Inferencias sobre ρ":
     st.markdown(
         """
 |z| = 8,81 > 1,96 (Sig. < 0,001): se rechaza H₀, hay correlación lineal en la población.
+Esto no contradice el punto 4: hay una tendencia lineal significativa, pero la relación es curva,
+por eso r es solo moderado.
 
 **Intervalo con la transformación de Fisher:** z<sub>r</sub> = ½·ln(1,6648/0,3352) = 0,8014, error
 estándar 1/√97 = 0,1015, intervalo 0,8014 ± 1,96 × 0,1015 = (0,6024; 1,0004). En la escala de r:

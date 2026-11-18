@@ -99,6 +99,29 @@ VARIABLE LABELS ZRE_1 'Residuo estandarizado' PRE_1 'Pronóstico'
   LMCI_1 'Límite inferior media 95 %' UMCI_1 'Límite superior media 95 %'
   LICI_1 'Límite inferior individual 95 %' UICI_1 'Límite superior individual 95 %'.
 
+* ---- 8. Recta de regresión con el intervalo de confianza al 95 % para la media ----.
+* Formato de ejes del gráfico (se restablece después).
+FORMATS esperanza PRE_1 LMCI_1 UMCI_1 (F8.0).
+GGRAPH
+  /GRAPHDATASET NAME="gic" VARIABLES=pib esperanza PRE_1 LMCI_1 UMCI_1 MISSING=LISTWISE REPORTMISSING=NO
+  /GRAPHSPEC SOURCE=INLINE.
+BEGIN GPL
+SOURCE: s=userSource(id("gic"))
+DATA: x=col(source(s), name("pib"))
+DATA: y=col(source(s), name("esperanza"))
+DATA: p=col(source(s), name("PRE_1"))
+DATA: li=col(source(s), name("LMCI_1"))
+DATA: ls=col(source(s), name("UMCI_1"))
+GUIDE: axis(dim(1), label("PIB per cápita 2024 (US$ corrientes)"))
+GUIDE: axis(dim(2), label("Esperanza de vida al nacer 2024 (años)"))
+GUIDE: text.title(label("Recta de regresión e intervalo de confianza al 95 % para la media"))
+ELEMENT: point(position(x*y))
+ELEMENT: line(position(x*p), color(color.black), size(size."1.5pt"))
+ELEMENT: line(position(x*li), color(color.red), shape(shape.dash), size(size."0.75pt"))
+ELEMENT: line(position(x*ls), color(color.red), shape(shape.dash), size(size."0.75pt"))
+END GPL.
+FORMATS esperanza (F8.3) PRE_1 LMCI_1 UMCI_1 (F11.5).
+
 * ---- 4. Pruebas de normalidad sobre el residuo estandarizado -------------.
 EXAMINE VARIABLES=ZRE_1
   /PLOT NPPLOT
