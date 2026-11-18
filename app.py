@@ -271,8 +271,6 @@ elif seccion == "5. Coeficientes y ecuación":
     formula("b = Sxy / Sxx = 0,000177 &nbsp;&nbsp;&nbsp; a = Ȳ − b·X̄ = 70,104")
     spss("t08_coeficientes", "Coeficientes (REGRESIÓN, IBM SPSS Statistics).")
     formula("Ŷ = 70,104 + 0,000177·X")
-    st.markdown("En la fila (Constante) está a y en la fila del PIB per cápita está b. El error típico "
-                "de la estimación es s<sub>yx</sub> = 5,666 años.", unsafe_allow_html=True)
 
 # ==========================================================================
 elif seccion == "6. Interpretación de a y b":
