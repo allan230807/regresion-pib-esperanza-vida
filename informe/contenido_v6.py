@@ -173,9 +173,12 @@ def construir(inf):
       "los más ricos. Este rendimiento decreciente del ingreso ya había sido descrito por Preston (1975). "
       "También se ven casos llamativos: Nigeria y Chad viven unos 15 años menos de lo que da la recta, "
       "Estados Unidos vive menos que otros países ricos, y Guyana tiene casi 30.000 dólares por persona "
-      "por el reciente auge petrolero, pero 70,3 años de esperanza de vida.")
-    inf.figura("g04_dispersion", "Diagrama de dispersión de la esperanza de vida según el PIB per cápita",
-               "Salida de GGRAPH de IBM SPSS Statistics, con la recta de mínimos cuadrados.", ancho=5.0)
+      "por el reciente auge petrolero, pero 70,3 años de esperanza de vida. Las líneas discontinuas son el "
+      "intervalo de confianza al 95 % para la media de Y: es angosto cerca del PIB medio y se abre hacia "
+      "los extremos, sobre todo en los PIB más altos, donde hay pocos países.")
+    inf.figura("g04b_dispersion_ic", "Diagrama de dispersión de la esperanza de vida según el PIB per cápita",
+               "Salida de GGRAPH de IBM SPSS Statistics, con la recta de mínimos cuadrados y los límites del "
+               "intervalo de confianza al 95 % para la media.", ancho=5.5)
 
     # 4. Supuestos
     h(2, "4. Verificación de supuestos")

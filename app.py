@@ -114,7 +114,7 @@ if seccion == "Portada":
     )
     c1, c2 = st.columns([3, 2], gap="large")
     with c1:
-        spss("g04_dispersion", "Diagrama de dispersión con la recta de mínimos cuadrados (IBM SPSS Statistics).")
+        spss("g04b_dispersion_ic", "Diagrama de dispersión con la recta de regresión e intervalo de confianza al 95 % (IBM SPSS Statistics).")
     with c2:
         st.subheader("El trabajo en pocas líneas")
         st.markdown(
@@ -218,12 +218,15 @@ azules promedian 81,9 años y las zonas rojas 59,0.
 # ==========================================================================
 elif seccion == "3. Diagrama de dispersión":
     st.header("3. Diagrama de dispersión")
-    spss("g04_dispersion", "Diagrama de dispersión con la recta de mínimos cuadrados (GGRAPH, IBM SPSS Statistics).")
+    spss("g04b_dispersion_ic", "Diagrama de dispersión con la recta de regresión e intervalo de confianza al 95 % (GGRAPH, IBM SPSS Statistics).")
     st.markdown(
         """
 La relación es positiva, pero no sigue una recta. Hasta unos 20.000 dólares la esperanza de vida sube
 muy rápido y luego la nube se aplana entre 80 y 85 años. La recta pasa por encima de casi todos los
 países pobres, por debajo de muchos de ingreso medio y otra vez por encima de los más ricos.
+
+Las líneas rojas discontinuas son el **intervalo de confianza al 95 % para la media**: es angosto cerca
+del PIB medio y se abre hacia los extremos, sobre todo en los PIB altos, donde hay pocos países.
 
 Casos llamativos: Nigeria y Chad viven unos 15 años menos de lo que da la recta, Estados Unidos vive
 menos que otros países ricos y Guyana, con casi 30.000 dólares por el auge petrolero, vive 70,3 años.
