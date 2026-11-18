@@ -99,12 +99,26 @@ VARIABLE LABELS ZRE_1 'Residuo estandarizado' PRE_1 'Pronóstico'
   LMCI_1 'Límite inferior media 95 %' UMCI_1 'Límite superior media 95 %'
   LICI_1 'Límite inferior individual 95 %' UICI_1 'Límite superior individual 95 %'.
 
-* ---- 4. Pruebas de normalidad sobre el residuo estandarizado -------------.
-EXAMINE VARIABLES=ZRE_1
-  /PLOT NPPLOT
-  /STATISTICS NONE
-  /MISSING LISTWISE
-  /NOTOTAL.
+* ---- 3. Diagrama de dispersión con la recta y el intervalo de confianza --.
+* Las bandas son los límites al 95 % para la media (LMCI_1 y UMCI_1) que guarda REGRESSION.
+GGRAPH
+  /GRAPHDATASET NAME="gi" VARIABLES=pib esperanza PRE_1 LMCI_1 UMCI_1 MISSING=LISTWISE REPORTMISSING=NO
+  /GRAPHSPEC SOURCE=INLINE.
+BEGIN GPL
+SOURCE: s=userSource(id("gi"))
+DATA: x=col(source(s), name("pib"))
+DATA: y=col(source(s), name("esperanza"))
+DATA: p=col(source(s), name("PRE_1"))
+DATA: li=col(source(s), name("LMCI_1"))
+DATA: ls=col(source(s), name("UMCI_1"))
+GUIDE: axis(dim(1), label("PIB per cápita 2024 (US$ corrientes)"))
+GUIDE: axis(dim(2), label("Esperanza de vida al nacer 2024 (años)"))
+GUIDE: text.title(label("Diagrama de dispersión con la recta de regresión e intervalo de confianza al 95 %"))
+ELEMENT: point(position(x*y))
+ELEMENT: line(position(x*p), color(color.black))
+ELEMENT: line(position(x*li), shape(shape.dash), color(color.red))
+ELEMENT: line(position(x*ls), shape(shape.dash), color(color.red))
+END GPL.
 
 * ---- 8. Pronósticos e intervalos para Venezuela y países de contraste ----.
 TEMPORARY.

@@ -232,20 +232,18 @@ menos que otros países ricos y Guyana, con casi 30.000 dólares por el auge pet
 # ==========================================================================
 elif seccion == "4. Verificación de supuestos":
     st.header("4. Verificación de supuestos")
-    st.markdown("Usamos los gráficos de residuos del procedimiento REGRESIÓN de SPSS y las pruebas de "
-                "normalidad, con α = 0,05.")
+    st.markdown("Usamos los gráficos de residuos del procedimiento REGRESIÓN de SPSS y el estadístico de "
+                "Durbin-Watson.")
     st.subheader("Normalidad")
     c1, c2 = st.columns(2)
     with c1:
         spss("g06_pp_zresid", "Gráfico P-P normal del residuo estandarizado (IBM SPSS Statistics).")
     with c2:
         spss("g05_histograma_zresid", "Histograma del residuo estandarizado (IBM SPSS Statistics).")
-    spss("t09_normalidad", "Pruebas de normalidad del residuo estandarizado (EXPLORAR, IBM SPSS Statistics).")
     st.markdown(
         """
 Los puntos del P-P se separan de la diagonal en el centro y el histograma tiene una cola larga a la
-izquierda (residuos cercanos a −3, de Nigeria y Chad). Kolmogorov-Smirnov (0,137) y Shapiro-Wilk
-(0,936) dan Sig. < 0,001, así que **se rechaza la normalidad**.
+izquierda (residuos cercanos a −3, de Nigeria y Chad), así que **los residuos no son normales**.
 """)
     st.subheader("Linealidad y homocedasticidad")
     spss("g07_zpred_zresid", "Residuo estandarizado contra pronóstico estandarizado (IBM SPSS Statistics).")

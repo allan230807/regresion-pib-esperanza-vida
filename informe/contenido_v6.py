@@ -108,8 +108,8 @@ def construir(inf):
       "H_{0}: B = 0 con F = CMReg / CME, que tiene 1 y n − 2 grados de libertad.")
     p("Los supuestos se verifican con la salida de SPSS. La linealidad se juzga en el diagrama de "
       "dispersión y en el gráfico de residuos. La normalidad se revisa con el gráfico P-P normal y el "
-      "histograma del residuo estandarizado, y se confirma con las pruebas de Kolmogorov-Smirnov y "
-      "Shapiro-Wilk, cuya hipótesis nula es que los residuos son normales. La homocedasticidad se juzga en "
+      "histograma del residuo estandarizado: si los residuos son normales, los puntos del P-P siguen la "
+      "diagonal y el histograma tiene forma de campana simétrica. La homocedasticidad se juzga en "
       "el gráfico de dispersión del residuo estandarizado (ZRESID) contra el pronóstico estandarizado "
       "(ZPRED): los puntos deben formar una banda horizontal sin forma de embudo. La independencia se "
       "revisa con el estadístico de Durbin-Watson, que debe estar cerca de 2.")
@@ -180,7 +180,7 @@ def construir(inf):
     # 4. Supuestos
     h(2, "4. Verificación de supuestos")
     p("Revisamos los supuestos con los gráficos de residuos que da el procedimiento REGRESIÓN de SPSS y "
-      "con las pruebas de normalidad, usando α = 0,05.")
+      "con el estadístico de Durbin-Watson.")
     p("*Linealidad.* El diagrama de dispersión del punto 3 ya mostraba una nube curva, y el gráfico de "
       "residuos de la Figura 4 lo confirma: los residuos forman un arco, con muchos valores negativos en los "
       "pronósticos más bajos, positivos en el centro y otra vez negativos en los más altos. El supuesto de "
@@ -193,16 +193,12 @@ def construir(inf):
       "no parece constante, de modo que este supuesto tampoco se cumple con claridad.")
     p("*Normalidad.* En el gráfico P-P (Figura 5) los puntos se separan de la diagonal en la parte "
       "central, y el histograma (Figura 6) no es simétrico: tiene una cola larga a la izquierda, con "
-      "residuos estandarizados cercanos a −3 (Nigeria y Chad). Las dos pruebas de la Tabla 5 rechazan "
-      "H_{0}: Kolmogorov-Smirnov da 0,137 y Shapiro-Wilk 0,936, ambas con Sig. < 0,001. Los residuos no "
-      "siguen una distribución normal.")
+      "residuos estandarizados cercanos a −3 (Nigeria y Chad). Los residuos no siguen una distribución "
+      "normal.")
     inf.figura("g06_pp_zresid", "Gráfico P-P normal del residuo estandarizado",
                "Salida de REGRESIÓN de IBM SPSS Statistics.", ancho=3.6)
     inf.figura("g05_histograma_zresid", "Histograma del residuo estandarizado",
                "Salida de REGRESIÓN de IBM SPSS Statistics.", ancho=4.3)
-    inf.tabla("t09_normalidad", "Pruebas de normalidad del residuo estandarizado",
-              "Salida de EXPLORAR de IBM SPSS Statistics. La prueba de Kolmogorov-Smirnov lleva la "
-              "corrección de significación de Lilliefors.")
     p("*Independencia.* Los datos son de corte transversal, un dato por país. El estadístico de "
       "Durbin-Watson, que aparece en la tabla Resumen del modelo del punto 10, es 1,929; como está muy "
       "cerca de 2, no hay indicios de autocorrelación de los residuos.")
@@ -216,7 +212,7 @@ def construir(inf):
       "obtenemos")
     eq("b = 14.044.679,0 / 79.142.486.769,1 = 0,000177")
     eq("a = 73,6848 − 0,000177 × 20.178,843 = 70,104")
-    p("La Tabla 6 es la salida de SPSS: en la fila (Constante) está a y en la fila del PIB está b. La "
+    p("La Tabla 5 es la salida de SPSS: en la fila (Constante) está a y en la fila del PIB está b. La "
       "ecuación estimada es", sangria=False)
     eq("Ŷ = 70,104 + 0,000177·X")
     inf.tabla("t08_coeficientes", "Coeficientes del modelo",
@@ -235,7 +231,7 @@ def construir(inf):
     # 7. Inferencias sobre A y B
     h(2, "7. Inferencias sobre A y B poblacionales")
     p("Trabajamos con α = 0,05, de modo que el valor crítico es z_{0,975} = 1,96. Los valores de b, "
-      "s_{b}, z y Sig. están en la Tabla 6.")
+      "s_{b}, z y Sig. están en la Tabla 5.")
     p("*Pendiente B.* H_{0}: B = 0 (el PIB per cápita no explica la esperanza de vida) contra "
       "H_{1}: B ≠ 0.")
     eq("z = b / s_{b} = 0,000177 / 0,0000201 = 8,81")
@@ -249,7 +245,7 @@ def construir(inf):
     eq("A: 70,104 ± 1,96 × 0,697 → (68,737 ; 71,471)")
     p("Con 95 % de confianza, cada 10.000 dólares adicionales de PIB per cápita se asocian en la población "
       "con un aumento de entre 1,38 y 2,17 años de esperanza de vida. Ningún intervalo contiene el cero, "
-      "lo que coincide con las pruebas. Los límites que da SPSS en la Tabla 6, (0,000137; 0,000217) para B "
+      "lo que coincide con las pruebas. Los límites que da SPSS en la Tabla 5, (0,000137; 0,000217) para B "
       "y (68,720; 71,488) para A, difieren de los nuestros solo en la tercera cifra decimal, porque SPSS "
       "los calcula con 98 grados de libertad.", sangria=False)
 
@@ -267,7 +263,7 @@ def construir(inf):
     p("Con 95 % de confianza, la esperanza de vida media de los países con un PIB per cápita de 4.244,5 "
       "dólares está entre 69,58 y 72,13 años, y para un país en particular con ese ingreso, como "
       "Venezuela, esperamos que esté entre 59,68 y 82,04 años. El valor observado de Venezuela, 72,67 "
-      "años, cae dentro del intervalo y está 1,81 años por encima del pronóstico. La Tabla 7 muestra los "
+      "años, cae dentro del intervalo y está 1,81 años por encima del pronóstico. La Tabla 6 muestra los "
       "intervalos que calcula SPSS para Venezuela y cuatro países de contraste (con 98 grados de libertad, "
       "por eso varían en la primera o segunda cifra decimal).", sangria=False)
     inf.tabla("t10_intervalos", "Pronósticos e intervalos al 95 % para Venezuela y países de contraste",
@@ -280,7 +276,7 @@ def construir(inf):
 
     # 9. Correlación
     h(2, "9. Inferencias sobre el coeficiente de correlación poblacional")
-    p("El coeficiente de correlación muestral es r = 0,665 (Tabla 8), una correlación positiva y moderada. "
+    p("El coeficiente de correlación muestral es r = 0,665 (Tabla 7), una correlación positiva y moderada. "
       "Planteamos H_{0}: ρ = 0 contra H_{1}: ρ ≠ 0, con α = 0,05.")
     eq("z = r·√(n − 2) / √(1 − r^{2}) = 0,6648 × √98 / √(1 − 0,4420) = 8,81")
     p("Como |z| = 8,81 > 1,96 (Sig. < 0,001), rechazamos H_{0}: hay correlación lineal entre las dos "
@@ -294,7 +290,7 @@ def construir(inf):
       "1,0004) y, al devolverlo a la escala de r, queda")
     eq("IC 95 % para ρ: (0,539 ; 0,762)")
     p("Con 95 % de confianza, la correlación poblacional está entre 0,54 y 0,76. SPSS da exactamente el "
-      "mismo intervalo (Tabla 9).", sangria=False)
+      "mismo intervalo (Tabla 8).", sangria=False)
     inf.tabla("t05b_ic_correlacion", "Intervalo de confianza al 95 % para la correlación poblacional",
               "Salida de CORRELACIONES de IBM SPSS Statistics, con la transformación z de Fisher.")
 
